@@ -1,22 +1,15 @@
-import os, sys
+# Python packages imports
+import os
 import numpy as np
 from numpy import ma
 import pandas as pd
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap as bm
-from mpl_toolkits.basemap import addcyclic, shiftgrid
-from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import json
 import xray
-from collections import OrderedDict as od
-from itertools import chain
-import bottleneck  as bn
-from matplotlib.mlab import detrend_linear
-import palettable
-from scipy.stats import ttest_ind
 from scipy.stats import linregress
 
+# relative imports
 from ..utils.do_kdtree import do_kdtree
 from ..utils.haversine import haversine
 from ..utils.pprint_od import pprint_od
