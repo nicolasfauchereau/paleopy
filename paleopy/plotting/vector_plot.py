@@ -1,4 +1,11 @@
-class vector_plot: 
+import numpy as np
+from numpy import ma
+from matplotlib import pyplot as plt
+from mpl_toolkits.basemap import Basemap as bm
+from mpl_toolkits.basemap import addcyclic
+import palettable
+
+class vector_plot:
     def __init__(self, ucompos, vcompos):
         self.ucompos = ucompos
         self.vcompos = vcompos
