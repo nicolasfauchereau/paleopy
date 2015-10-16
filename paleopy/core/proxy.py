@@ -92,6 +92,9 @@ class proxy:
             lons, lats = np.meshgrid(lon, lat)
             lonf = lons.flatten('F')
             latf = lats.flatten('F')
+            ### TODO:
+            ### test, then replace do_kdtree with the call to the sel
+            ### method of a xray.Dataset with method = 'nearest'
             self.extracted_coords = do_kdtree(lonf, latf, point)
             self.distance_point = haversine(self.extracted_coords, point)
             ts = dset[self.variable].sel(longitudes=self.extracted_coords[0], latitudes=self.extracted_coords[1])

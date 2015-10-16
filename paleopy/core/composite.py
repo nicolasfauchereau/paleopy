@@ -186,6 +186,10 @@ class composite:
 
         return self
 
+    def save_to_file(self, fname=None):
+        nc = dset[['composite_anomalies', 'pvalues']]
+        nc = nc.to_netcdf(fname)
+
     def close(self):
         """
         implements a `close` method to close the open datasets
