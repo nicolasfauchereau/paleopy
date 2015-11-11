@@ -1,0 +1,20 @@
+def seasons_params():
+    seasons_params = {}
+    seasons_params['DJF'] = (3,2)
+    seasons_params['JFM'] = (3,3)
+    seasons_params['FMA'] = (3,4)
+    seasons_params['MAM'] = (3,5)
+    seasons_params['AMJ'] = (3,6)
+    seasons_params['MJJ'] = (3,7)
+    seasons_params['JJA'] = (3,8)
+    seasons_params['JAS'] = (3,9)
+    seasons_params['ASO'] = (3,10)
+    seasons_params['SON'] = (3,11)
+    seasons_params['OND'] = (3,12)
+    seasons_params['NDJ'] = (3,1)
+    seasons_params['Warm Season (Dec. - May)'] = (6, 5)
+    seasons_params['Cold Season (Jun. - Nov.)'] = (6, 11)
+    #seasons_params['Annual'] = (12, 12)
+    seasons_params['Year (Jan. - Dec.)'] = (12, 12)
+    seasons_params['Hydro. year (Jul. - Jun.)'] = (12, 6)
+    return seasons_params

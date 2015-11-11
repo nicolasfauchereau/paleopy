@@ -13,10 +13,10 @@ def haversine(coord1, coord2):
     -------
         km: the distance between location 1 and 2 in km
     """
-    # convert decimal degrees to radians 
+    # convert decimal degrees to radians
     lon1, lat1 = map(radians, coord1)
     lon2, lat2 = map(radians, coord2)
-    # haversine formula 
+    # haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2

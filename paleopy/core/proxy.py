@@ -15,6 +15,8 @@ from ..utils.do_kdtree import do_kdtree
 from ..utils.haversine import haversine
 from ..utils.pprint_od import pprint_od
 
+import warnings
+warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 class proxy:
     'base class for a single proxy'
@@ -235,11 +237,15 @@ class proxy:
         analogs = self.analogs
         analog_years = self.analog_years
         variable = self.variable
-        vmin = y[variable].min() + (0.1 * y[variable].min())
-        vmax = y[variable].max() + (0.1 * y[variable].max())
+
         trend = self.trend_line
         btrend = self.detrend
         units = self.dset_dict['units']
+
+        yt = y[variable] + trend.values.flatten()
+
+        vmin = yt.min() -0.1 * (np.abs(yt.min()))
+        vmax = yt.max() +0.1 * (np.abs(yt.min()))
 
         f, ax = plt.subplots(figsize=(8,5))
 
@@ -247,7 +253,7 @@ class proxy:
         ax.plot(trend.index, trend.values, '0.4', label='trend')
 
         if btrend:
-            ax.plot(y.index, y[variable] + trend.values.flatten(), 'steelblue', lw=2, label='ts')
+            ax.plot(y.index, yt, 'steelblue', lw=2, label='ts')
 
         ax.plot(y.index, y[variable], color='k', lw=2, label='ts (detrended)')
 
@@ -271,7 +277,7 @@ class proxy:
 
         lyears = ",".join(map(str, analogs.index.year.tolist()))
 
-        ax.set_title("Analog seasons for {} {} from {} {}:\n{}".format('DJF', self.sitename, self.dataset,
+        ax.set_title("Analog seasons for {} {} from {} {}:\n{}".format(self.season, self.sitename, self.dataset,
                                                                     variable, lyears, fontsize=14))
 
         [l.set_fontsize(14) for l in ax.xaxis.get_ticklabels()]
@@ -280,3 +286,5 @@ class proxy:
         if fname:
             f.savefig(fname, dpi=200)
             plt.close(f)
+
+        return f
