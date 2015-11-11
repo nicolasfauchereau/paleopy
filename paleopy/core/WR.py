@@ -52,8 +52,8 @@ class WR:
         MC_probs_classes = MC_probs_classes.split(',')
         MC_probs = pd.DataFrame(MC_probs, index=MC_probs_classes)
         MC_probs = MC_probs.reindex(self.dict_json[self.classification]['types'])
-        # ! the MC_probs_classes attribute contains 
-        # the classes in the order they are saved in the HDF files
+        # The MC_probs contains the frequencies 
+        # of each type in the 1000 simulations
         self.MC_probs = MC_probs
         return self
         
@@ -75,8 +75,8 @@ class WR:
     
     def _get_clim_probs(self): 
         if not(hasattr(self, 'ts_seas')): 
-            ts_seas = _get_season_ts()
-        ts = ts_seas.ix[str(self.climatology[0]): str(self.climatology[1])]
+            ts_seas = self._get_season_ts()
+        ts = ts_seas.ix[str(self.climatology[0]): str(self.climatology[1])].copy()
         types = self.dict_json[self.classification]['types']
         clim_probs = get_probs(ts['type'], types)
         clim_probs = pd.Series(clim_probs, index=types)
@@ -84,9 +84,10 @@ class WR:
         
     def _get_compos_probs(self): 
         if not(hasattr(self, 'ts_seas')): 
-            ts_seas = _get_season_ts()
+            ts_seas = self._get_season_ts()
         ayears = list(map(str, self.analog_years))
-        ts = pd.concat([self.ts_seas.ix[l] for l in ayears])
+        ts = ts_seas.copy()
+        ts = pd.concat([ts.ix[l] for l in ayears])
         types = self.dict_json[self.classification]['types']
         obs_probs = get_probs(ts['type'], types)
         obs_probs = pd.Series(obs_probs, index=types)
