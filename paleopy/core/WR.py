@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import h5py
 import json
+import seaborn as sns
 
 from ..markov import *
 from ..utils import seasons_params
@@ -29,6 +30,8 @@ class WR:
         self.analog_years = self.parent.analog_years
         self.detrend = self.parent.detrend
         self.climatology = self.parent.climatology
+        if self.parent.description == 'proxy': 
+            self.sitename = self.parent.sitename
         
     def _get_WR_json(self): 
         with open(self.json_file, 'r') as f:
@@ -82,10 +85,23 @@ class WR:
         clim_probs = pd.Series(clim_probs, index=types)
         return clim_probs
         
-    def _get_compos_probs(self): 
+    def _get_compos_probs(self, analog_years): 
+        """
+        Arguments
+        ---------
+        
+        analog_years : list
+                       list of analog years
+                       
+        Return
+        ------
+        
+        obs_probs : pandas.Series
+                    observed probabilities
+        """
         if not(hasattr(self, 'ts_seas')): 
             ts_seas = self._get_season_ts()
-        ayears = list(map(str, self.analog_years))
+        ayears = list(map(str, analog_years))
         ts = ts_seas.copy()
         ts = pd.concat([ts.ix[l] for l in ayears])
         types = self.dict_json[self.classification]['types']
@@ -93,6 +109,52 @@ class WR:
         obs_probs = pd.Series(obs_probs, index=types)
         return obs_probs
     
-    def probs_anomalies(self): 
-        pass
+    def probs_anomalies(self, kind='one'): 
+        """
+        Arguments
+        ---------
+        
+        kind : string
+               if kind == 'one': 
+                   either for a `proxy` or for all the years
+                   in an `ensemble` as a whole
+               if kind == 'many':
+                   for each proxy record in an `ensemble` object
+                       
+        Return
+        ------
+        
+        anoms_probs : pandas.Series
+                      probabilities anomalies
+        
+        """
+        
+        # get the climatological probabilities
+        clim_probs = self._get_clim_probs()
+        
+        if kind == 'one': 
+            obs_probs = self._get_compos_probs(self.analog_years)
+            df = obs_probs - clim_probs
+            if self.parent.description == 'proxy': 
+                self.df_anoms = pd.DataFrame(df, columns=[self.sitename])
+            else: 
+                self.df_anoms = pd.DataFrame(df, columns=['ensemble'])
+        if kind == 'many':
+            """
+            we can only calculate `many` anomalies 
+            if the object passed to the WR instance 
+            is an `ensemble` object
+            """
+            if self.parent.description != 'ensemble':
+                print("""ERROR! cannot calculate `many` anomalies with a proxy
+                object: need an `ensemble` object""")
+                raise Exception("KIND ERROR")
+            else: 
+                df = {}
+                d = self.parent.dict_proxies
+                for k in d.keys():
+                    obs_probs = self._get_compos_probs(analog_years = d[k]['analog_years'])
+                    anoms = obs_probs - clim_probs
+                    df[k] = anoms
+                self.df_anoms = pd.DataFrame(df)
         
