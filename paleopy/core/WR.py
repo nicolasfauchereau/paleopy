@@ -54,11 +54,12 @@ class WR:
         f.close()
         MC_probs_classes = MC_probs_classes.split(',')
         MC_probs = pd.DataFrame(MC_probs, index=MC_probs_classes)
+        # reindex so that the index of the MC simulations follows the 
+        # order of the types defined in the JSON file
         MC_probs = MC_probs.reindex(self.dict_json[self.classification]['types'])
         # The MC_probs contains the frequencies 
         # of each type in the 1000 simulations
-        self.MC_probs = MC_probs
-        return self
+        return MC_probs
         
     def _get_season_ts(self): 
         if not(hasattr(self,'wr_ts')): 
@@ -82,6 +83,7 @@ class WR:
         ts = ts_seas.ix[str(self.climatology[0]): str(self.climatology[1])].copy()
         types = self.dict_json[self.classification]['types']
         clim_probs = get_probs(ts['type'], types)
+        # create a pandas.Series, index are the types
         clim_probs = pd.Series(clim_probs, index=types)
         return clim_probs
         
@@ -109,7 +111,7 @@ class WR:
         obs_probs = pd.Series(obs_probs, index=types)
         return obs_probs
     
-    def probs_anomalies(self, kind='one'): 
+    def probs_anomalies(self, kind='one', test=True): 
         """
         Arguments
         ---------
@@ -129,32 +131,64 @@ class WR:
         
         """
         
-        # get the climatological probabilities
+        # get the climatological probabilities, those are always the same
         clim_probs = self._get_clim_probs()
         
         if kind == 'one': 
             obs_probs = self._get_compos_probs(self.analog_years)
-            df = obs_probs - clim_probs
+            anoms = obs_probs - clim_probs
             if self.parent.description == 'proxy': 
-                self.df_anoms = pd.DataFrame(df, columns=[self.sitename])
+                self.df_anoms = pd.DataFrame(anoms, columns=[self.sitename])
+                self.df_probs = pd.DataFrame(obs_probs, columns=[self.sitename])
             else: 
-                self.df_anoms = pd.DataFrame(df, columns=['ensemble'])
+                self.df_anoms = pd.DataFrame(anoms, columns=['ensemble'])
+                self.df_probs = pd.DataFrame(obs_probs, columns=['ensemble'])
+            # if test, the percentiles values are added as columns to 
+            # the df_probs pandas.DataFrame
+            if test: 
+                MC_probs = self._get_WR_MC()
+                for tval in [0.1, 0.9, 0.05, 0.95, 0.01, 0.99]: 
+                    c = str(int(tval * 100))
+                    self.df_probs.loc[:,c] = MC_probs.T.quantile(tval)
+                
         if kind == 'many':
             """
             we can only calculate `many` anomalies 
             if the object passed to the WR instance 
-            is an `ensemble` object
+            is an `ensemble` object, raise an exception
+            if that is not the case
             """
             if self.parent.description != 'ensemble':
-                print("""ERROR! cannot calculate `many` anomalies with a proxy
-                object: need an `ensemble` object""")
+                print("""
+                ERROR! cannot calculate `many` anomalies with a proxy
+                object: you need to pass an `ensemble` object to the 
+                `WR` class
+                """)
                 raise Exception("KIND ERROR")
             else: 
-                df = {}
+                d_anoms = {}
+                d_probs = {}
                 d = self.parent.dict_proxies
                 for k in d.keys():
                     obs_probs = self._get_compos_probs(analog_years = d[k]['analog_years'])
-                    anoms = obs_probs - clim_probs
-                    df[k] = anoms
-                self.df_anoms = pd.DataFrame(df)
-        
+                    d_anoms[k] = obs_probs - clim_probs
+                    d_probs[k] = obs_probs
+                # df_probs contains the ANOMALIES in frequencies (probabilities)
+                # for the composite years for each proxy in the ensemble
+                # index = types
+                # columns = proxies 
+                self.df_anoms = pd.DataFrame(d_anoms)
+                # df_probs contains the OBSERVED frequencies (probabilities)
+                # for the composite years for each proxy in the ensemble
+                # index = types
+                # columns = proxies
+                self.df_probs = pd.DataFrame(d_probs)
+            # if test, we add another DataFrame to the object, containing the
+            # percentile values coming from the MC simulation
+            if test: 
+                MC_probs = self._get_WR_MC()
+                df_probs_MC = pd.DataFrame()
+                for tval in [0.1, 0.9, 0.05, 0.95, 0.01, 0.99]: 
+                    c = str(int(tval * 100))
+                    df_probs_MC.loc[:,c] = MC_probs.T.quantile(tval)
+                self.df_probs_MC = df_probs_MC
