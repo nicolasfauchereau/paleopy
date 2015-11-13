@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import h5py
 import json
-import seaborn as sns
 
 from ..markov import *
 from ..utils import seasons_params
