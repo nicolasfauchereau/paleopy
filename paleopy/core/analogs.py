@@ -7,13 +7,13 @@ import bottleneck  as bn
 from matplotlib.mlab import detrend_linear
 from scipy.stats import ttest_ind
 
-class composite:
+class analogs:
     """
-    base class for composite plots
+    base class for analogs calculations
     takes either a proxy or ensemble instance
     """
     def __init__(self, obj, dataset, variable):
-        super(composite, self).__init__()
+        super(analogs, self).__init__()
         # the parent can be either an instance of a `proxy` or `ensemble` class
         self.parent = obj
         # the dataset to read from

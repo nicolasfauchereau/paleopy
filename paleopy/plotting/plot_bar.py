@@ -43,4 +43,4 @@ def plot_bar(wr, ensemble=True)
         else: 
             plt.setp(b,facecolor='blue', alpha=0.5)
     
-    return fig, wrone
+    return wrone
