@@ -1,0 +1,10 @@
+pandas
+numpy
+matplotlib
+palettable
+basemaps
+json
+xray
+scipy
+glob
+h5py
