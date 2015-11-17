@@ -50,10 +50,11 @@ def heatmap(wr):
     
     [l.set_fontsize(12) for l in ax.yaxis.get_ticklabels()]
     [l.set_fontsize(12) for l in ax.xaxis.get_ticklabels()]
-
+    [l.set_rotation(90) for l in ax.xaxis.get_ticklabels()]
+    
     # this is a small adjustment to align the vertical lines to the 
     # cells boundaries
-#     adj = 0.01
+    #     adj = 0.01
     adj = 0
     
     ax.hlines(np.arange(1,anoms.shape[0]), 0, anoms.shape[1])
@@ -65,7 +66,7 @@ def heatmap(wr):
 
     # plots the colorbar
     cb = plt.colorbar(im, ticks=np.linspace(vmin, vmax, 11), boundaries=np.linspace(vmin, vmax, 11), drawedges=True)
-    cb.set_label('Frequency anomalies', fontsize=14)
+    cb.set_label('% change in frequency', fontsize=14)
     [l.set_fontsize(12) for l in cb.ax.yaxis.get_ticklabels()]
     
     ax.set_title(classification, fontsize=14)

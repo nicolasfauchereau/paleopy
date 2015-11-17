@@ -1,4 +1,4 @@
-def plot_bar(wr, ensemble=True)
+def plot_bar(wr, ensemble=True):
     """
     """
     
@@ -22,10 +22,10 @@ def plot_bar(wr, ensemble=True)
         """.format(wr.df_anoms.shape[1]))
         raise Exception("size error")
             
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8,8))
     ax1 = fig.add_subplot(111)
     ax1.bar(np.arange(0.5, len(clim_probs)+0.5), clim_probs * 100, color="0.8", width=1., alpha=0.8)
-    ax1.set_ylabel("frequency %")
+    ax1.set_ylabel("climatological frequency %")
     ax2 = ax1.twinx()
     ax2.axhline(0,color='k', lw=1, linestyle='dashed')
     ax2.set_ylabel("% change in frequency")
@@ -34,13 +34,27 @@ def plot_bar(wr, ensemble=True)
     
     bp = df_anoms.T.boxplot(ax=ax2, patch_artist=True);
     
-    wrone = copy.copy(wr)
+    wrone = copy(wr)
     wrone.probs_anomalies(kind='one')
+    testb = (wrone.df_probs['ensemble'] < wrone.df_probs["10"]) \
+    | (wrone.df_probs['ensemble'] > wrone.df_probs["90"]).values
+    
     
     for i,b in enumerate(bp['boxes']):
         if wrone.df_anoms.iloc[i,:].values >= 0: 
-            plt.setp(b,facecolor='red', alpha=0.5)
+            plt.setp(b,facecolor='r', edgecolor='r', alpha=0.5)
+            plt.plot(i+1,wrone.df_anoms.iloc[i,:]*100, 'r*')
+            if testb[i]: 
+                plt.setp(b,facecolor='r', edgecolor='r', alpha=0.9)
         else: 
-            plt.setp(b,facecolor='blue', alpha=0.5)
+            plt.setp(b,facecolor='b', edgecolor='b', alpha=0.5)
+            plt.plot(i+1,wrone.df_anoms.iloc[i,:]*100, 'b*')
+            if testb[i]: 
+                plt.setp(b,facecolor='b', edgecolor='r', alpha=0.9)
     
-    return wrone
+    plt.setp(bp['fliers'], color='gray', marker='+',visible=True)
+    plt.setp(bp['medians'],color='k',linewidth=1)
+    
+    ax2.set_title(w.classification, fontsize=14)
+    
+    return fig

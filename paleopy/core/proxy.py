@@ -257,7 +257,7 @@ class proxy:
 
         ax.plot(y.index, y[variable], color='k', lw=2, label='ts (detrended)')
 
-        ax.plot(analogs.index, analogs[variable], 'ro')
+        ax.plot(analogs.index, analogs[variable], 'ro', label='analog years')
 
         ax.set_ylim(vmin, vmax)
 
