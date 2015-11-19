@@ -87,7 +87,7 @@ class proxy:
             self.distance_point = haversine(self.extracted_coords, point)
             ts = dset[self.variable].sel(longitudes=self.extracted_coords[0], latitudes=self.extracted_coords[1])
             ts = ts.to_dataframe()
-            self.ts = ts.loc[:,self.variable]
+            self.ts = pd.DataFrame(ts.loc[:,self.variable])
         else:
             lon = dset['longitudes'].data
             lat = dset['latitudes'].data
@@ -101,7 +101,7 @@ class proxy:
             self.distance_point = haversine(self.extracted_coords, point)
             ts = dset[self.variable].sel(longitudes=self.extracted_coords[0], latitudes=self.extracted_coords[1])
             ts = ts.to_dataframe()
-            self.ts = ts.loc[:,self.variable]
+            self.ts = pd.DataFrame(ts.loc[:,self.variable])
         dset.close()
 
     def calculate_season(self):
@@ -142,57 +142,54 @@ class proxy:
         # drop the missing values coming from the rolling average
         ts_seas.dropna(inplace=True)
 
-        self.ts_seas = ts_seas
+        # casts that into a pandas DataFrame
+        ts_seas.loc[:,'anomalies'] = ts_seas - ts_seas.ix[start_clim:end_clim].mean(0)
 
+        # caculates trend for raw values
+        x = ts_seas.index.year
+        y = ts_seas.loc[:,self.variable]
+        slope, intercept, pval, rval, stderr = linregress(x, y)
+        if not self.calc_anoms:
+            self.trend_params = {'slope':slope, 'intercept':intercept}
+        yhat = slope * x + intercept
+        ydetrend = y - yhat
+        ts_seas.loc[:,'d_' + self.variable] = (ydetrend + y.mean())
+
+        # calculates the trend for the anomalies
+        x = ts_seas.index.year
+        y = ts_seas.loc[:,'anomalies']
+        slope, intercept, pval, rval, stderr = linregress(x, y)
         if self.calc_anoms:
-            ts_seas = ts_seas - ts_seas.ix[start_clim:end_clim].mean(0)
-            self.ts_seas = ts_seas
-            # we calculate the trend but don't subtract it
-            x = self.ts_seas.index.year
-            y = self.ts_seas.values
-            slope, intercept, pval, rval, stderr = linregress(x, y)
-            yhat = slope * x + intercept
-            self.trend_params = {'slope':slope, 'intercept':intercept, 'pval':pval, 'rval':rval, 'sterr':stderr}
-            self.trend_line = pd.DataFrame(yhat, index=self.ts_seas.index, columns=[self.variable+'_trend'])
+            self.trend_params = {'slope':slope, 'intercept':intercept}
+        yhat = slope * x + intercept
+        ydetrend = y - yhat
+        ts_seas.loc[:,'d_anomalies'] = ydetrend
 
-        if self.detrend:
-            # we calculate the trend AND subtract it
-            x = self.ts_seas.index.year
-            y = self.ts_seas.values
-            slope, intercept, pval, rval, stderr = linregress(x, y)
-            yhat = slope * x + intercept
-            ydetrend = y - yhat
-            ts_seas = pd.DataFrame(ydetrend, index=self.ts_seas.index, columns=[self.variable])
-            self.ts_seas = ts_seas
-            self.trend_params = {'slope':slope, 'intercept':intercept, 'pval':pval, 'rval':rval, 'sterr':stderr}
-            self.trend_line = pd.DataFrame(yhat, index=self.ts_seas.index, columns=[self.variable+'_trend'])
-
-        else:
-            # we calculate the trend on the raw values, and don't subtract it
-            x = self.ts_seas.index.year
-            y = self.ts_seas.values
-            slope, intercept, pval, rval, stderr = linregress(x, y)
-            yhat = slope * x + intercept
-            self.trend_params = {'slope':slope, 'intercept':intercept, 'pval':pval, 'rval':rval, 'sterr':stderr}
-            self.trend_line = pd.DataFrame(yhat, index=self.ts_seas.index, columns=[self.variable+'_trend'])
-
-        self.ts_seas = pd.DataFrame(self.ts_seas.values, index=self.ts_seas.index, columns=[self.variable])
+        self.ts_seas = ts_seas
 
     def find_analogs(self):
         val = self.value
-        ts_seas = self.ts_seas
+        if self.calc_anoms and not self.detrend:
+            ts = self.ts_seas.loc[:,'anomalies']
+        if self.calc_anoms and self.detrend:
+            ts = self.ts_seas.loc[:,'d_anomalies']
+        if not self.calc_anoms and self.detrend:
+            ts = self.ts_seas.loc[:,'d_' + self.variable]
+        if not self.calc_anoms and not self.detrend:
+            ts = self.ts_seas.loc[:,self.variable]
+
         labels=['WB','B','N','A','WA']
-        ts_seas.loc[:,'cat'], bins = pd.qcut(ts_seas[self.variable], 5, labels=labels, retbins=True)
+        self.ts_seas.loc[:,'cat'], bins = pd.qcut(ts, 5, labels=labels, retbins=True)
         # if value passed is a string, we get from the category
         if isinstance(val, str):
-            subset = ts_seas[ts_seas['cat'] == val]
+            subset = self.ts_seas[self.ts_seas['cat'] == val]
             self.category = val
         # if not, then we search in the bins
         else:
             bins[0] = -np.inf
             bins[-1] = np.inf
             category = labels[np.searchsorted(bins, val)-1]
-            subset = ts_seas[ts_seas['cat'] == category]
+            subset = self.ts_seas[self.ts_seas['cat'] == category]
             self.category = category
         self.analogs = subset
         self.analog_years = subset.index.year
@@ -233,52 +230,53 @@ class proxy:
 
     def plot_season_ts(self, fname=None):
 
-        y = self.ts_seas
-        analogs = self.analogs
-        analog_years = self.analog_years
-        variable = self.variable
-
-        trend = self.trend_line
-        btrend = self.detrend
-        units = self.dset_dict['units']
-
-        yt = y[variable] + trend.values.flatten()
-
-        vmin = yt.min() -0.1 * (np.abs(yt.min()))
-        vmax = yt.max() +0.1 * (np.abs(yt.min()))
-
         f, ax = plt.subplots(figsize=(8,5))
 
-        # if the user chose to detrend, we show the non-detrended time-series
-        ax.plot(trend.index, trend.values, '0.4', label='trend')
+        if self.calc_anoms:
+            y = self.ts_seas.loc[:,'anomalies']
+            vmin = y.min() -0.1 * (np.abs(y.min()))
+            vmax = y.max() +0.1 * (np.abs(y.min()))
 
-        if btrend:
-            ax.plot(y.index, yt, 'steelblue', lw=2, label='ts')
+            yd = self.ts_seas.loc[:,'d_anomalies']
 
-        ax.plot(y.index, y[variable], color='k', lw=2, label='ts (detrended)')
+            if self.detrend:
+                ya = self.analogs.loc[:,'d_anomalies']
+            else:
+                ya = self.analogs.loc['anomalies']
 
-        ax.plot(analogs.index, analogs[variable], 'ro', label='analog years')
+        else:
+
+            y = self.ts_seas.loc[:,self.variable]
+            vmin = y.min() -0.01 * (np.abs(y.min()))
+            vmax = y.max() +0.01 * (np.abs(y.min()))
+
+            yd = self.ts_seas.loc[:,'d_' + self.variable]
+
+            if self.detrend:
+                ya = self.analogs.loc[:,'d_' + self.variable]
+            else:
+                ya = self.analogs.loc[self.variable]
+
+        ax.plot(y.index, y.values, 'steelblue', lw=2, label='ts')
+        ax.plot(yd.index, yd.values, color='k', lw=2, label='ts (detrended)')
+        ax.plot(ya.index, ya.values, 'ro', label='analog years')
+        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.4, label="")
+
+        ax.set_xlim(y.index[0] - relativedelta(years=1), y.index[-1] + relativedelta(years=1))
 
         ax.set_ylim(vmin, vmax)
-
-        ax.set_ylabel(variable +": " + units, fontsize=14)
-
-        ax.set_xlim(trend.index[0] - relativedelta(years=1), trend.index[-1] + relativedelta(years=1))
-
-        ax.set_xticks(trend.index[np.arange(1,len(y), 4)])
+        ax.set_ylabel(self.variable +": " + self.dset_dict['units'], fontsize=14)
 
         ax.legend(framealpha=0.4, loc='best')
-
-        ax.vlines(analogs.index, vmin, vmax, lw=5, alpha=0.4)
 
         [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
 
         ax.grid()
 
-        lyears = ",".join(map(str, analogs.index.year.tolist()))
+        lyears = ",".join(map(str, self.analogs.index.year.tolist()))
 
         ax.set_title("Analog seasons for {} {} from {} {}:\n{}".format(self.season, self.sitename, self.dataset,
-                                                                    variable, lyears, fontsize=14))
+                                                                    self.variable, lyears, fontsize=14))
 
         [l.set_fontsize(14) for l in ax.xaxis.get_ticklabels()]
         [l.set_fontsize(14) for l in ax.yaxis.get_ticklabels()]
