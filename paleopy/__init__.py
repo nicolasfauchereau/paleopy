@@ -9,12 +9,13 @@ Python backend for Past Interpretation of Cimate Tool (aka PICT)
 
 """
 
-# after `import paleopy`, all the classes defined in `core` are 
+# after `import paleopy`, all the classes defined in `core` are
 # available in the `paleopy` namespace, e.g. `paleopy.proxy`
 from .core import *
-from .markov import *
-# plotting functions and classes will be avaible in the `plotting` 
+# plotting functions and classes will be avaible in the `plotting`
 # namespace, e.g. `paleopy.plotting.heatmap`
 from . import plotting
 # same thing for the `utils` functions
 from . import utils
+# same thing for the `markov` functions
+from . import markov
