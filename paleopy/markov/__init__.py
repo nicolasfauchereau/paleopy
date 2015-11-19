@@ -1,7 +1,5 @@
-import numpy as np
-import pandas as pd
-
 def get_probs(x, classes):
+    import numpy as np
     """
     Returns the normalized frequencies (i.e. probability
             of occurrences) of each class (defined in classes)
@@ -18,6 +16,8 @@ def get_probs(x, classes):
     return np.array([float(x.count(c)) for c in classes]) / len(x)
 
 def get_transition_probs(x, classes=None):
+    import numpy as np
+    import pandas as pd
     """
     x is a dataframe or a time-series
 
