@@ -8,3 +8,4 @@ xray==0.6.1
 bottleneck==1.0.0
 dateutil==2.4.2
 json==2.0.9
+palettable=2.1.1
