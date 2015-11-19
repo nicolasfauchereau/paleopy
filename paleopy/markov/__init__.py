@@ -110,6 +110,7 @@ def simulate_2D(states, freqs, trans, N=1000, P=1000):
 	"""
 
 	"""
+    import numpy as np
 	x = np.empty((N,P),dtype=np.int32)
 
 	x[0,:] = np.random.choice(len(states), size=(P,), replace=True, p=freqs)

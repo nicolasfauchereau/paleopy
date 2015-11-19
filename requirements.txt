@@ -1,0 +1,10 @@
+paleopy
+numpy==1.10.1
+scipy==0.16.0
+pandas==0.17.0
+matplotlib==1.5.0
+basemap==1.0.7
+xray==0.6.1
+bottleneck==1.0.0
+dateutil==2.4.2
+json==2.0.9
