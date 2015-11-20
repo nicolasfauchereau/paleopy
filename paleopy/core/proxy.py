@@ -19,9 +19,64 @@ import warnings
 warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 class proxy:
-    'base class for a single proxy'
+    """
+    base class for a single proxy
 
-    def __init__(self, sitename, lon, lat, dataset, variable, season, value=None, \
+    Parameters
+    ----------
+
+    sitename : string
+            The name of the proxy site, no default
+    lon : float
+            The longitude (in decimal degrees) of the site
+    lat : float
+            The latitude (in decimal degrees) of the site
+    dataset : string
+            The dataset to load to look for analogs, see
+            the `datasets.json` file for a list of the available
+            datasets (e.g. `ersst`, 'ncep', `gpcp`)
+            default is `ersst`
+    variable : string
+            The variable to extract from the dataset to look for analogs, see
+            the `datasets.json` file for a list of variables available for
+            each dataset (e.g. for `ncep` dataset: `hgt_1000, hgt_850` etc
+            default is `sst`
+    season : string
+            The season to which the proxy is sensitive, can be:
+            - any of `DJF`, `JFM`, `FMA`, ..
+            - `Warm Season (Dec. - May)`
+            - `Cold Season (Jun. - Nov.)`
+            - `Year (Jan. - Dec.)`
+            - `Hydro. year (Jul. - Jun.)`
+            default is `DJF`
+    value : float or integer or string
+            The value attached to the proxy
+            if string, must be in ['WB', 'B', 'N', 'A', 'WA']
+            for Well-Below, Below, etc and will be taken
+            as the category of anomalies WRT to present conditions
+    period : tuple of integers
+            The period from which the analogs can be taken in a
+            given dataset. Default is (1979, 2014)
+    climatology : tuple of integers
+            The climatological period with respect to which the
+            anomalies (if `calc_anoms == True`) are calculated
+    calc_anoms : boolean
+            If `True`, the anomalies are calculated before the analog
+            years are determined: The `value` parameter needs to represent
+            an *anomaly* with respect to present condition
+            If `False`, the analog years are determined from the raw seasonal
+            time-series: The `value` parameter needs to represent a raw value
+            (i.e. a rainfall amount, a mean temperature)
+    detrend : boolean
+            If `True` the linear trend is removed from the time-series
+            before the analog years are determined, if `False`, nothing is
+            done
+
+    Attributes
+    ----------
+    """
+
+    def __init__(self, sitename, lon, lat, dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
