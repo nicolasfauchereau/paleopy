@@ -7,13 +7,13 @@ import palettable
 
 class scalar_plot:
     """
-    scalar plot accepts a `composite` object and implements
+    scalar plot accepts a `analogs` object and implements
     methods to plot a scalar plot on a map
     """
-    def __init__(self, compos, center=None, robust=True, robust_percentile=1.0, \
+    def __init__(self, analogs, center=None, robust=True, robust_percentile=1.0, \
               vmin=None, vmax=None, cmap=None, grid=True, domain=None, proj=None, res='c', test=None, border=True):
 
-        self.compos = compos
+        self.analogs = analogs
         self.domain = domain
         self.center = center
         self.robust = robust
@@ -31,24 +31,24 @@ class scalar_plot:
 
     def get_domain(self, domain):
 
-        domain_dset = self.compos.dset_dict['domain']
+        domain_dset = self.analogs.dset_dict['domain']
 
         if ( (self.domain[0] < domain_dset[0]) | (self.domain[1] > domain_dset[1])  \
             | (self.domain[2] < domain_dset[2]) | (self.domain[3] > domain_dset[3]) ):
-            print("""ERROR! the domain for the composite is partly outside the limits of the dataset""")
+            print("""ERROR! the domain for the analogsite is partly outside the limits of the dataset""")
             raise Exception("DOMAIN ERROR")
 
         else:
             # checks whether the first latitude is the northermost or southermost latitude
-            latstart = self.compos.dset['latitudes'].data[0]
-            latend  = self.compos.dset['latitudes'].data[-1]
+            latstart = self.analogs.dset['latitudes'].data[0]
+            latend  = self.analogs.dset['latitudes'].data[-1]
             # if first latitude northermost, reverse the order of the domain selection
             if latstart > latend:
-                dset_domain = self.compos.dset.sel(latitudes=slice(self.domain[3], self.domain[2]), \
+                dset_domain = self.analogs.dset.sel(latitudes=slice(self.domain[3], self.domain[2]), \
                                                    longitudes=slice(self.domain[0], self.domain[1]))
             # if not, go ahead with the domain limits as they are provided
             else:
-                dset_domain = self.compos.dset.sel(latitudes=slice(self.domain[2], self.domain[3]), \
+                dset_domain = self.analogs.dset.sel(latitudes=slice(self.domain[2], self.domain[3]), \
                                                    longitudes=slice(self.domain[0], self.domain[1]))
 
             self.dset_domain = dset_domain
@@ -65,14 +65,14 @@ class scalar_plot:
         if self.domain:
             self.get_domain(self.domain)
         else:
-            self.dset_domain = self.compos.dset
+            self.dset_domain = self.analogs.dset
 
         # get the lat and lons
         latitudes = self.dset_domain['latitudes'].data
         longitudes = self.dset_domain['longitudes'].data
 
-        # get the data (composite anomalies)
-        mat = self.dset_domain['composite_anomalies'].data
+        # get the data (analogsite anomalies)
+        mat = self.dset_domain['analogsite_anomalies'].data
         pvalues = self.dset_domain['pvalues'].data
 
         if not(self.proj):
@@ -96,7 +96,7 @@ class scalar_plot:
         lons, lats = np.meshgrid(longitudes, latitudes)
 
         # ravel and removes nans for calculation of intervals etc
-        calc_data = self.compos.dset['composite_anomalies'].data
+        calc_data = self.analogs.dset['analogsite_anomalies'].data
         calc_data = np.ravel(calc_data[np.isfinite(calc_data)])
 
         # the following is borrowed from xray
@@ -128,7 +128,7 @@ class scalar_plot:
         if self.cmap is None:
             if divergent:
                 # get the colormap defined in the dset_dict
-                self.cmap = eval(self.compos.dset_dict['plot']['cmap'])
+                self.cmap = eval(self.analogs.dset_dict['plot']['cmap'])
             else:
                 # get the default matplotlib colormap
                 self.cmap = plt.get_cmap()
@@ -158,13 +158,13 @@ class scalar_plot:
         # sets the colorbar
         cb = m.colorbar(im)
         [l.set_fontsize(14) for l in cb.ax.yaxis.get_ticklabels()]
-        cb.set_label(self.compos.dset_dict['units'],fontsize=14)
+        cb.set_label(self.analogs.dset_dict['units'],fontsize=14)
 
         # draw the coastlines
         m.drawcoastlines()
 
         # if one is plotting SST data, fill the continents
-        if self.compos.variable in ['sst','SST']:
+        if self.analogs.variable in ['sst','SST']:
             m.fillcontinents('0.8', lake_color='0.8')
 
         # if grid, plots the lat  / lon lines on the map
@@ -182,7 +182,7 @@ class scalar_plot:
             ax.axis('off')
 
         # set the title from the description in the dataset + variable JSON entry
-        ax.set_title(self.compos.dset_dict['description'], fontsize=14)
+        ax.set_title(self.analogs.dset_dict['description'], fontsize=14)
 
         return f
 

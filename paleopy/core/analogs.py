@@ -9,8 +9,8 @@ from scipy.stats import ttest_ind
 
 class analogs:
     """
-    base class for analogs calculations
-    takes either a proxy or ensemble instance
+    base class for analogs calculations,
+    takes either a `proxy` or `ensemble` instance
     """
     def __init__(self, obj, dataset, variable):
         super(analogs, self).__init__()
