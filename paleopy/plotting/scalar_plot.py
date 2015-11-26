@@ -138,7 +138,7 @@ class scalar_plot:
 
         r, c = mat.shape
 
-        f, ax = plt.subplots(figsize=(8,8*(c/r)), dpi=200)
+        f, ax = plt.subplots(figsize=(8*(c/r), 8), dpi=200)
 
         # the basemap instance gets attached to the created axes
         m.ax = ax

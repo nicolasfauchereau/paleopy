@@ -76,7 +76,7 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename, lon, lat, dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename, lon, lat, dpath='./jsons', dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
@@ -84,6 +84,7 @@ class proxy:
         self.description = 'proxy'
         self.sitename = sitename
         self.coords = (lon, lat)
+        self.jsons = dpath
         self.dataset = dataset
         self.variable = variable
         self.season = season
@@ -93,8 +94,8 @@ class proxy:
         self.calc_anoms = calc_anoms
         self.detrend = detrend
 
-    def read_dset_params(self, dpath='./jsons'):
-        with open(os.path.join(dpath, 'datasets.json'), 'r') as f:
+    def read_dset_params(self):
+        with open(os.path.join(self.jsons, 'datasets.json'), 'r') as f:
             dset_dict = json.loads(f.read())
         self.dset_dict = dset_dict[self.dataset][self.variable]
 
@@ -275,6 +276,7 @@ class proxy:
             pprint_od(proxy_dict)
 
         if outfile:
+            json_path = os.path.join(self.jsons, 'proxies')
             proxy_name = self.sitename.replace(" ","_")
             proxy_name = proxy_name.replace(".","")
             #proxy_name =

@@ -10,16 +10,15 @@ class indices():
     """
     defines an index
     """
-    def __init__(self, obj, jsons = './jsons/', name=None):
-        self.jsons = jsons
+    def __init__(self, obj, name=None):
+        self.parent = obj
         self.analog_years = np.unique(obj.analog_years)
         self.season = obj.season
-        self.jsons = jsons
         self.name = name
 
     def _read_csv(self):
         s_pars = seasons_params()[self.season]
-        with open(os.path.join(self.jsons, 'indices.json'), 'r') as f:
+        with open(os.path.join(self.parent.jsons, 'indices.json'), 'r') as f:
             dict_json = json.loads(f.read())
         if self.name is not None:
             data = pd.read_csv(dict_json[self.name]['path'], index_col=0, parse_dates=True)
