@@ -31,7 +31,7 @@ class analogs:
         """
         reads in the Dataset parameters
         """
-        with open(os.path.join(self.parent.jsons, 'datasets.json'), 'r') as f:
+        with open(os.path.join(self.parent.djsons, 'datasets.json'), 'r') as f:
             dset_dict = json.loads(f.read())
         # dset_dict is a dictionnary holding useful metadata
         self.dset_dict = dset_dict[self.dataset][self.variable]

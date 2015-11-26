@@ -31,6 +31,11 @@ class proxy:
             The longitude (in decimal degrees) of the site
     lat : float
             The latitude (in decimal degrees) of the site
+    djsons : string
+            The path to the json files defining the paths
+            and parameters arrached to each dataset + variable
+    pjsons : string
+            The path where to save the individual proxy json files
     dataset : string
             The dataset to load to look for analogs, see
             the `datasets.json` file for a list of the available
@@ -76,7 +81,7 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, lon=None, lat=None, dpath='./jsons', dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, lon=None, lat=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
@@ -84,7 +89,8 @@ class proxy:
         self.description = 'proxy'
         self.sitename = sitename
         self.coords = (lon, lat)
-        self.jsons = dpath
+        self.djsons = djsons
+        self.pjsons = pjsons
         self.dataset = dataset
         self.variable = variable
         self.season = season
@@ -95,7 +101,7 @@ class proxy:
         self.detrend = detrend
 
     def read_dset_params(self):
-        with open(os.path.join(self.jsons, 'datasets.json'), 'r') as f:
+        with open(os.path.join(self.djsons, 'datasets.json'), 'r') as f:
             dset_dict = json.loads(f.read())
         self.dset_dict = dset_dict[self.dataset][self.variable]
 
@@ -251,7 +257,7 @@ class proxy:
         self.analog_years = subset.index.year
         self.quintiles = bins
 
-    def proxy_repr(self, pprint=False, outfile=True, json_path='./jsons/proxies'):
+    def proxy_repr(self, pprint=False, outfile=True):
         """
         proxy_dict is an OrderedDict
         """
@@ -276,12 +282,11 @@ class proxy:
             pprint_od(proxy_dict)
 
         if outfile:
-            json_path = os.path.join(self.jsons, 'proxies')
             proxy_name = self.sitename.replace(" ","_")
             proxy_name = proxy_name.replace(".","")
             #proxy_name =
             fname = "{}.json".format(self.sitename.replace(" ","_"))
-            with open(os.path.join(json_path, fname),'w') as f:
+            with open(os.path.join(self.pjsons, fname),'w') as f:
                 json.dump(proxy_dict, f)
         self.proxy_dict = proxy_dict
 

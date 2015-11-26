@@ -19,8 +19,11 @@ class ensemble:
     Attributes
     ----------
 
-    jsons : string
-            The path to the directory containing the json files
+    djsons : string
+            The path to the directory containing the datasets json files
+
+    pjsons : string
+            The path to the directory containing the individual proxy json files
 
     season : string
              The season
@@ -37,15 +40,16 @@ class ensemble:
                    proxy files
 
     """
-    def __init__(self, jsons, season=None):
+    def __init__(self, djsons='../jsons', pjsons='../jsons/proxies', season='DJF'):
         super(ensemble, self).__init__()
         # type
         self.description = 'ensemble'
         # `jsons` is the path to the individual proxies JSON files
-        self.jsons = jsons
+        self.djsons = djsons
+        self.pjsons = pjsons
         self.season = season
 
-        lfiles = glob(os.path.join(jsons, "*.json"))
+        lfiles = glob(os.path.join(self.pjsons, "*.json"))
         self.analog_years = []
         self.detrend = []
         seasons = []

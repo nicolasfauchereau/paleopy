@@ -20,8 +20,14 @@ parse command line arguments
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-d','--dpath', dest='dpath', type=str, default='../jsons', \
-help='the path to the data (jsons and associated netcdf and csv files)')
+parser.add_argument('-dj','--djsons', dest='djsons', type=str, default='../jsons', \
+help='the path to the jsons files defining the paths and parameters of each dataset')
+
+parser.add_argument('-pj','--pjsons', dest='pjsons', type=str, default='../jsons/proxies', \
+help='the path where to save the individual proxy json files')
+
+parser.add_argument('-o','--opath', dest='opath', type=str, default='./outputs', \
+help='the path where to save the figures')
 
 parser.add_argument('-n','--name', dest='sitename', type=str, default='Rarotonga', \
 help='the name of the site')
@@ -63,6 +69,8 @@ goes from argparse Namespace to a dictionnary or key / value arguments
 
 vargs = vars(parser.parse_args())
 
+opath = vargs.pop('opath')
+
 """
 instantiates a proxy class, pass the `vargs` dict of keyword arguments to the class
 """
@@ -82,7 +90,8 @@ p.extract_ts()
 p.calculate_season()
 p.find_analogs()
 f = p.plot_season_ts()
-f.savefig('./essai.png')
+p.proxy_repr()
+f.savefig(os.path.join(opath,'essai.png'))
 
 """
 instantiate the analog classes with the proxy for each dataset + variable we
@@ -98,24 +107,24 @@ sst = analogs(p, 'ersst', 'sst').composite()
 
 f = scalar_plot(sst, test=0.1, proj='cyl').plot()
 
-f.savefig('./map.png')
+f.savefig(os.path.join(opath,'map1_proxy.png'))
 
 # ==============================================================================
 """
-UWND
+UWND at 850 and 200 hPa
 """
 
 uwnd = analogs(p, 'ncep', 'uwnd_200').composite()
 
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
-f.savefig('./map2.png')
+f.savefig(os.path.join(opath,'map2_proxy.png'))
 
 uwnd = analogs(p, 'ncep', 'uwnd_850').composite()
 
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
-f.savefig('./map3.png')
+f.savefig(os.path.join(opath,'map3_proxy.png'))
 
 # ==============================================================================
 """
@@ -124,4 +133,4 @@ CLIMATE INDICES
 
 f = indices(p).plot()
 
-f.savefig('./indices.png')
+f.savefig(os.path.join(opath,'indices_proxy.png'))

@@ -18,7 +18,7 @@ class indices():
 
     def _read_csv(self):
         s_pars = seasons_params()[self.season]
-        with open(os.path.join(self.parent.jsons, 'indices.json'), 'r') as f:
+        with open(os.path.join(self.parent.djsons, 'indices.json'), 'r') as f:
             dict_json = json.loads(f.read())
         if self.name is not None:
             data = pd.read_csv(dict_json[self.name]['path'], index_col=0, parse_dates=True)
