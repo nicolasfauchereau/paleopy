@@ -76,7 +76,7 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename, lon, lat, dpath='./jsons', dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, lon=None, lat=None, dpath='./jsons', dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
