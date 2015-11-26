@@ -1,5 +1,7 @@
 import numpy as np
 from numpy import ma
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from mpl_toolkits.basemap import Basemap as bm
 from mpl_toolkits.basemap import addcyclic
@@ -72,7 +74,7 @@ class scalar_plot:
         longitudes = self.dset_domain['longitudes'].data
 
         # get the data (analogsite anomalies)
-        mat = self.dset_domain['analogsite_anomalies'].data
+        mat = self.dset_domain['composite_anomalies'].data
         pvalues = self.dset_domain['pvalues'].data
 
         if not(self.proj):
@@ -96,7 +98,7 @@ class scalar_plot:
         lons, lats = np.meshgrid(longitudes, latitudes)
 
         # ravel and removes nans for calculation of intervals etc
-        calc_data = self.analogs.dset['analogsite_anomalies'].data
+        calc_data = self.analogs.dset['composite_anomalies'].data
         calc_data = np.ravel(calc_data[np.isfinite(calc_data)])
 
         # the following is borrowed from xray
