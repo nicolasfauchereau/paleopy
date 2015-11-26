@@ -44,22 +44,33 @@ help='the season to which the proxy is sensitive')
 parser.add_argument('-val','--value', dest='value', default=0.6, \
 help='the value for the proxy (can be either a float or a string)')
 
+parser.add_argument('-per','--period', dest='period', type=tuple, default=(1979, 2014), \
+help='the period from which to draw the analog seasons')
+
+parser.add_argument('-clim','--climatology', dest='climatology', type=tuple, default=(1981, 2010), \
+help='the climatological period with respect to which the anomalies are calculated')
+
 parser.add_argument('-an','--calc_anoms', dest='calc_anoms', type=bool, default=True, \
 help='True if the anomalies are calculated, False otherwise. Default is True')
 
 parser.add_argument('-dt','--detrend', dest='detrend', type=bool, default=True, \
 help='True if the time-series need detrended, False otherwise. Default is True')
 
-args = parser.parse_args()
-
-globals().update(vars(args))
 
 """
-instantiate a proxy class
+goes from argparse Namespace to a dictionnary or key / value arguments
 """
 
-p = proxy(sitename, lon, lat, dpath=dpath, dataset=dataset, variable=variable,
-          season=season, value=value, calc_anoms=calc_anoms, detrend=detrend)
+vargs = vars(parser.parse_args())
+
+"""
+instantiates a proxy class, pass the `vargs` dict of keyword arguments to the class
+"""
+
+p = proxy(**vargs)
+
+# p = proxy(sitename, lon, lat, dpath=dpath, dataset=dataset, variable=variable,
+#           season=season, value=value, period=period, climatology=climatology, calc_anoms=calc_anoms, detrend=detrend)
 
 
 """
@@ -78,11 +89,21 @@ instantiate the analog classes with the proxy for each dataset + variable we
 want to map
 """
 
+# ==============================================================================
+"""
+SST
+"""
+
 sst = analogs(p, 'ersst', 'sst').composite()
 
 f = scalar_plot(sst, test=0.1, proj='cyl').plot()
 
 f.savefig('./map.png')
+
+# ==============================================================================
+"""
+UWND
+"""
 
 uwnd = analogs(p, 'ncep', 'uwnd_200').composite()
 
@@ -96,9 +117,11 @@ f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig('./map3.png')
 
+# ==============================================================================
 """
-instantiate an `indices` class and plot
+CLIMATE INDICES
 """
 
 f = indices(p).plot()
+
 f.savefig('./indices.png')
