@@ -1,7 +1,5 @@
 import numpy as np
 from numpy import ma
-import matplotlib
-matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from mpl_toolkits.basemap import Basemap as bm
 from mpl_toolkits.basemap import addcyclic

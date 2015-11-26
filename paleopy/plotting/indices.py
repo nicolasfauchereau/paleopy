@@ -2,8 +2,6 @@ import os
 import json
 import numpy as np
 import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from scipy.stats import zscore, ttest_1samp
 from ..utils import seasons_params
@@ -13,7 +11,7 @@ class indices():
     defines an index
     """
     def __init__(self, obj, jsons = './jsons/', name=None):
-        self
+        self.jsons = jsons
         self.analog_years = np.unique(obj.analog_years)
         self.season = obj.season
         self.jsons = jsons
