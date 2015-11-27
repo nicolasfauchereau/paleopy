@@ -4,7 +4,7 @@ classes and methods to calculate and plot analog composites from
 a paleoclimate proxy or an ensemble of paleoclimate proxies
 
 - [Calling paleopy from a script](#calling-paleopy-from-a-script)
-- [Jupyter notebooks examples](#Jupyter-notebooks-examples)
+- [Jupyter notebooks examples](#jupyter-notebooks-examples)
 
 <hr>
 
