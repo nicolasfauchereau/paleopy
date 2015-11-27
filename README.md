@@ -11,7 +11,7 @@ The `scripts` folder contains two scripts illustrating respectively
 how `paleopy` processes a *proxy* (`proxy_oper.py`) and an *ensemble
 of proxies* (`ensemble_oper.py`) from user input passed to the command line.
 
-* proxy_oper.py
++ **proxy_oper.py**
 
 ```
 → ./proxy_oper.py --help
@@ -58,7 +58,7 @@ optional arguments:
                         otherwise. Default is True
 ```
 
-+ ensemble_oper.py
++ **ensemble_oper.py**
 
 ```
 → ./ensemble_oper.py --help
@@ -82,14 +82,14 @@ optional arguments:
 
 In the `notebooks` folder, you will find 4 Jupyter notebooks:
 
-+ `proxy.ipynb` illustrates how a `proxy` (an individual *proxy*) class is instantiated and how
++ **`proxy.ipynb`** illustrates how a `proxy` (an individual *proxy*) class is instantiated and how
 the methods are called to process it, including
 the reconstruction of climate anomalies using the analog approach
 
-+ `ensemble.ipynb` illustrates how an `ensemble` (i.e. a collection of *proxies*) class is instantiated, then how ones reconstructs climate
++ **`ensemble.ipynb`** illustrates how an `ensemble` (i.e. a collection of *proxies*) class is instantiated, then how ones reconstructs climate
 anomalies using a network of proxies
 
-+ `WR.ipynb` illustrates the reconstruction of Weather Regimes (WR) frequency anomalies from an instance of an `ensemble` class
++ **`WR.ipynb`** illustrates the reconstruction of Weather Regimes (WR) frequency anomalies from an instance of an `ensemble` class
 
-+ `indices.ipynb` illustrates the reconstruction of anomalies for
++ **`indices.ipynb`** illustrates the reconstruction of anomalies for
 a set of climate indices (currently the SOI, NINO 3.4 SSTs, the SAM index and the IOD index)
