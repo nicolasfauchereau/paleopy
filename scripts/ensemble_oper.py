@@ -10,6 +10,7 @@ sys.path.insert(0, '../')
 
 from paleopy import analogs
 from paleopy import ensemble
+from paleopy import WR
 from paleopy.plotting import scalar_plot
 from paleopy.plotting import indices
 
@@ -91,3 +92,16 @@ CLIMATE INDICES
 f = indices(ens).plot()
 
 f.savefig(os.path.join(opath, 'indices_ensemble.png'))
+
+# ==============================================================================
+"""
+WEATHER REGIMES
+"""
+
+w = WR(ens, classification='Kidson Types')
+
+w.probs_anomalies(kind='many')
+
+f = w.plot_bar()
+
+f.savefig(os.path.join(opath, 'WR_ensemble.png'))

@@ -34,12 +34,13 @@ def bar(wr, ensemble=True):
     """
 
     ax1 = fig.add_subplot(111)
+
     ax1.bar(np.arange(0.5, len(clim_probs)+0.5), clim_probs * 100, color="0.8", width=1., alpha=0.8)
     ax1.set_ylabel("climatological frequency %", fontsize=14)
 
     [l.set_fontsize(14) for l in ax1.yaxis.get_ticklabels()]
     [l.set_fontsize(14) for l in ax1.xaxis.get_ticklabels()]
-
+    [l.set_rotation(90) for l in ax1.xaxis.get_ticklabels()]
 
     """
     AXES number 2: frequency anomalies
@@ -75,8 +76,7 @@ def bar(wr, ensemble=True):
 
     [l.set_fontsize(14) for l in ax2.xaxis.get_ticklabels()]
     [l.set_fontsize(14) for l in ax2.yaxis.get_ticklabels()]
+    [l.set_rotation(90) for l in ax2.xaxis.get_ticklabels()]
     ax2.set_title(wr.classification, fontsize=14)
-
-
 
     return fig

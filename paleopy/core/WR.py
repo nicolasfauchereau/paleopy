@@ -196,7 +196,9 @@ class WR:
                 self.df_probs_MC = df_probs_MC
 
     def plot_heatmap(self):
-        heatmap(self)
+        f = heatmap(self)
+        return f
 
     def plot_bar(self):
-        bar(self)
+        f = bar(self)
+        return f
