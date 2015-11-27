@@ -3,6 +3,9 @@
 classes and methods to calculate and plot analog composites from
 a paleoclimate proxy or an ensemble of paleoclimate proxies
 
+- [Calling paleopy from a script](#calling-paleopy-from-a-script)
+- [Jupyter notebooks examples](#Jupyter-notebooks-examples)
+
 <hr>
 
 ## calling paleopy from a script  
@@ -78,7 +81,7 @@ optional arguments:
                         individual proxies seasons
 ```
 
-## Jupyter / IPython examples
+## Jupyter notebooks examples
 
 In the `notebooks` folder, you will find 4 Jupyter notebooks:
 
