@@ -18,13 +18,13 @@ class WR:
     base class for weather regimes calculations and plots
     takes either a proxy or ensemble instance and either 'SW Pacific Regimes' or 'Kidson Types'
     """
-    def __init__(self, obj, json_file='./jsons/WRs.json', classification='Kidson Types'):
+    def __init__(self, obj, classification='Kidson Types'):
         super(WR, self).__init__()
 
         # the parent can be either an instance of a `proxy` or `ensemble` class
         self.parent = obj
 
-        self.json_file = json_file
+        self.djsons = obj.djsons
         self.classification = classification
 
         # get the season, and the analog years
@@ -36,7 +36,7 @@ class WR:
             self.sitename = self.parent.sitename
 
     def _get_WR_json(self):
-        with open(self.json_file, 'r') as f:
+        with open(os.path.join(self.djsons, 'WRs.json'), 'r') as f:
             dict_json = json.loads(f.read())
         return dict_json
 
@@ -69,7 +69,7 @@ class WR:
         ts = wr_ts.copy()
         ts.loc[:,'month'] = ts.index.month
 
-        sparams = seasons_params.seasons_params()
+        sparams = seasons_params()
         m = list(range(1,13)) + list(range(1,13))
         m = m[(sparams[self.season][1]-sparams[self.season][0]+12):(sparams[self.season][1]+12)]
 
