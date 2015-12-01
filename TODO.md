@@ -1,6 +1,6 @@
 ### 1 December 2015
 
-- [ ] add "April-March" to the list of seasons available
+- [x] add "April-March" to the list of seasons available
 - [ ] plot proxy(ies) location on the composite maps
 - [ ] proxy dependent symbol
 - [ ] the proxy type (i.e. "Tree-ring", "speleotheme", "coral core") should

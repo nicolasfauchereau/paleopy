@@ -14,6 +14,7 @@ from scipy.stats import linregress
 from ..utils.do_kdtree import do_kdtree
 from ..utils.haversine import haversine
 from ..utils.pprint_od import pprint_od
+from ..utils import seasons_params
 
 import warnings
 warnings.filterwarnings(action='ignore', category=FutureWarning)
@@ -173,33 +174,16 @@ class proxy:
         # seasons parameters is a dictionnary with:
         # key = the season string ('DJF', 'JJA')
         # value =  a tuple (length of the season, month of the end of the season)
-        seasons_params = {}
-        seasons_params['DJF'] = (3,2)
-        seasons_params['JFM'] = (3,3)
-        seasons_params['FMA'] = (3,4)
-        seasons_params['MAM'] = (3,5)
-        seasons_params['AMJ'] = (3,6)
-        seasons_params['MJJ'] = (3,7)
-        seasons_params['JJA'] = (3,8)
-        seasons_params['JAS'] = (3,9)
-        seasons_params['ASO'] = (3,10)
-        seasons_params['SON'] = (3,11)
-        seasons_params['OND'] = (3,12)
-        seasons_params['NDJ'] = (3,1)
-        seasons_params['Warm Season (Dec. - May)'] = (6, 5)
-        seasons_params['Cold Season (Jun. - Nov.)'] = (6, 11)
-        #seasons_params['Annual'] = (12, 12)
-        seasons_params['Year (Jan. - Dec.)'] = (12, 12)
-        seasons_params['Hydro. year (Jul. - Jun.)'] = (12, 6)
+        self.seasons_params = seasons_params()
 
         # if the variable is rainfall, we calculate rolling sum
         if self.dset_dict['units'] in ['mm']:
-            ts_seas = pd.rolling_sum(self.ts, seasons_params[season][0])
+            ts_seas = pd.rolling_sum(self.ts, self.seasons_params[season][0])
         # else we calculate the rolling mean (average)
         else:
-            ts_seas = pd.rolling_mean(self.ts, seasons_params[season][0])
+            ts_seas = pd.rolling_mean(self.ts, self.seasons_params[season][0])
 
-        ts_seas = ts_seas[ts_seas.index.month == seasons_params[season][1]]
+        ts_seas = ts_seas[ts_seas.index.month == self.seasons_params[season][1]]
 
         # drop the missing values coming from the rolling average
         ts_seas.dropna(inplace=True)
