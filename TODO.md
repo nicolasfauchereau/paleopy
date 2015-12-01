@@ -1,0 +1,17 @@
+### 1 December 2015
+
+- [] add "April-March" to the list of seasons available
+- [] plot proxy(ies) location on the composite maps
+- [] proxy dependent symbol
+- [] the proxy type (i.e. "Tree-ring", "speleotheme", "coral core") should
+be an argument of the proxy class instance
+- [] 1 map per year for proxy to be implemented (e.g. NZ region)
+- [] rename label "Kidson Type" to "New Zealand" in the heatmap and bar plots
+- [] for the indices boxplot: add mean value and std in the plot
+- [] composite netcdf output needs to include:
+  - [] a variable containing years: number of analogs
+  - [] a variable (nb of unique analog years, lat, lon)
+  - [x] the composite anomalies (already there)
+  - [x] the p-value
+
+- [] need to work out a way to interactively extract "sudo-proxies" from the above

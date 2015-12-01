@@ -38,7 +38,7 @@ class analogs:
 
     def _check_domain(self, domain):
         if not(hasattr(self, 'dset_dict')):
-            self.read_dset_params()
+            self._read_dset_params()
         self.domain = domain
         domain_dset = self.dset_dict['domain']
         if ( (self.domain[0] < domain_dset[0]) | (self.domain[1] > domain_dset[1])  \
@@ -187,7 +187,7 @@ class analogs:
         return self
 
     def save_to_file(self, fname=None):
-        nc = dset[['composite_anomalies', 'pvalues']]
+        nc = self.dset[['composite_anomalies', 'pvalues']]
         nc = nc.to_netcdf(fname)
 
     def close(self):
