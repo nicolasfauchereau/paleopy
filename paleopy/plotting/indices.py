@@ -39,24 +39,33 @@ class indices():
         return self
 
     def composite(self):
-        self = self._read_csv()
+        if not(hasattr(self, 'data')):
+            self._read_csv()
+        if isinstance(self.data, pd.core.frame.DataFrame):
+            compos = pd.concat([self.data.ix[str(y)] for y in self.analog_years])
+        elif isinstance(self.data, dict):
+            compos = {}
+            for i, k in enumerate(self.data):
+                df = self.data[k]
+                compos[k] = pd.concat([df.ix[str(y)] for y in self.analog_years])
+        self.compos = compos
 
-    def _plot_df(self, df, compos, ax, ax_n = 0, pval = None):
+    def _plot_df(self, df, ax, ax_n = 0, pval = None):
 
-        b = compos.boxplot(ax = ax, widths=0.85, patch_artist=True)
+        b = df.boxplot(ax = ax, widths=0.85, patch_artist=True)
 
-        if compos.mean().values < 0:
+        if df.mean().values < 0:
             plt.setp(b['boxes'],facecolor='b', edgecolor='b', alpha=0.5)
             plt.setp(b['fliers'], color='gray', marker='+',visible=True)
             plt.setp(b['medians'],color='k',linewidth=1)
             ax.set_ylim(-3, 3)
-            ax.plot(1, compos.mean().values, 's', color='b', ms=10)
+            ax.plot(1, df.mean().values, 's', color='b', ms=10)
         else:
             plt.setp(b['boxes'],facecolor='r', edgecolor='r', alpha=0.5)
             plt.setp(b['fliers'], color='gray', marker='+',visible=True)
             plt.setp(b['medians'],color='k',linewidth=1)
             ax.set_ylim(-3, 3)
-            ax.plot(1, compos.mean().values, 's', color='r', ms=10)
+            ax.plot(1, df.mean().values, 's', color='r', ms=10)
         ax.axhline(0, c='k')
         if ax_n == 0:
             ax.set_ylabel('std.', fontsize=14)
@@ -64,41 +73,49 @@ class indices():
         [l.set_fontsize(13) for l in ax.yaxis.get_ticklabels()]
         if pval is not None:
             if pval <= 0.1:
-                ax.set_title("p={:4.2f}\n".format(pval), fontsize=12, fontweight='bold')
+                ax.set_title("p={:4.2f}\n$\mu$={:4.2f}$\sigma$={:4.2f}".format(pval, \
+                df.mean().values[0], \
+                df.std().values[0]), \
+                fontsize=12, \
+                fontweight='bold')
             else:
-                ax.set_title("p={:4.2f}\n".format(pval), fontsize=12)
+                ax.set_title("p={:4.2f}\n$\mu$={:4.2f}\n$\sigma$={:4.2f}".format(pval, \
+                df.mean().values[0], \
+                df.std().values[0]), \
+                fontsize=12)
 
 
     def plot(self):
 
-        if not(hasattr(self, 'data')):
-            self.compos()
+        if not(hasattr(self, 'compos')):
+            self.composite()
 
-        if isinstance(self.data, pd.core.frame.DataFrame):
+        if isinstance(self.compos, pd.core.frame.DataFrame):
 
-            compos = pd.concat([self.data.ix[str(y)] for y in self.analog_years])
-
-            t, pval = ttest_1samp(compos.values, 0)
-
-            f, ax = plt.subplots(figsize=(1.5,6))
-
-            f.subplots_adjust(left=0.5)
-
-            self._plot_df(self.data, compos, ax, ax_n=0, pval=pval[0])
-
-        elif isinstance(self.data, dict):
-
-            l = len(self.data)
+            l = len(self.compos.columns())
             f, axes = plt.subplots(nrows=1, ncols=l, figsize=(l,6), sharey=True)
-            f.subplots_adjust(wspace=0.0, left=0.15)
+            f.subplots_adjust(wspace=0.0, left=0.15, bottom=0.05, top=0.87)
             axes = axes.flatten('F')
-            for i, k in enumerate(self.data):
-                df = self.data[k]
+            for i, k in enumerate(self.compos.columns):
 
-                compos = pd.concat([df.ix[str(y)] for y in self.analog_years])
+                df = self.compos[[k]]
 
-                t, pval = ttest_1samp(compos.values, 0)
+                t, pval = ttest_1samp(df.values, 0)
 
-                self._plot_df(df, compos, axes[i], ax_n=i, pval=pval[0])
+                self._plot_df(df, axes[i], ax_n=i, pval=pval[0])
+
+        elif isinstance(self.compos, dict):
+
+            l = len(self.compos.keys())
+            f, axes = plt.subplots(nrows=1, ncols=l, figsize=(l,6), sharey=True)
+            f.subplots_adjust(wspace=0.0, left=0.15, bottom=0.05, top=0.87)
+            axes = axes.flatten('F')
+            for i, k in enumerate(self.compos.keys()):
+
+                df = self.compos[k]
+
+                t, pval = ttest_1samp(df.values, 0)
+
+                self._plot_df(df, axes[i], ax_n=i, pval=pval[0])
 
         return f
