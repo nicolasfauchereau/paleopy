@@ -28,6 +28,12 @@ class proxy:
 
     sitename : string
             The name of the proxy site, no default
+
+    proxy_type : the type of proxy, no default
+            can be e.g.:
+            "Tree-ring"
+            "Speleotheme"
+            "Coral core"
     lon : float
             The longitude (in decimal degrees) of the site
     lat : float
@@ -82,13 +88,14 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, lon=None, lat=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
             lon += 360.
         self.description = 'proxy'
         self.sitename = sitename
+        self.proxy_type = proxy_type
         self.coords = (lon, lat)
         self.djsons = djsons
         self.pjsons = pjsons
@@ -247,6 +254,7 @@ class proxy:
         """
         proxy_dict = od()
         proxy_dict['sitename'] = self.sitename
+        proxy_dict['proxy_type'] = self.proxy_type
         proxy_dict['coords'] = self.coords
         proxy_dict['season'] = self.season
         proxy_dict['dataset'] = self.dataset
