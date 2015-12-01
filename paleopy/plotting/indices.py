@@ -38,6 +38,9 @@ class indices():
         self.data = data
         return self
 
+    def composite(self):
+        self = self._read_csv()
+
     def _plot_df(self, df, compos, ax, ax_n = 0, pval = None):
 
         b = compos.boxplot(ax = ax, widths=0.85, patch_artist=True)
@@ -69,7 +72,7 @@ class indices():
     def plot(self):
 
         if not(hasattr(self, 'data')):
-            self._read_csv()
+            self.compos()
 
         if isinstance(self.data, pd.core.frame.DataFrame):
 

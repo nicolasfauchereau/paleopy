@@ -7,6 +7,7 @@
 be an argument of the proxy class instance
 - [ ] 1 map per year for proxy to be implemented (e.g. NZ region)
 - [x] rename label "Kidson Type" to "New Zealand" in the heatmap and bar plots
+- [ ] barplot to work for an individual proxy
 - [ ] for the indices boxplot: add mean value and std in the plot
 - [ ] composite netcdf output needs to include:
   - [ ] a variable containing years: number of analogs

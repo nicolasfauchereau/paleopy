@@ -14,7 +14,7 @@ def seasons_params():
     seasons_params['NDJ'] = (3,1)
     seasons_params['Warm Season (Dec. - May)'] = (6, 5)
     seasons_params['Cold Season (Jun. - Nov.)'] = (6, 11)
-    #seasons_params['Annual'] = (12, 12)
+    seasons_params['Apr. - Mar.'] = (12, 3)
     seasons_params['Year (Jan. - Dec.)'] = (12, 12)
     seasons_params['Hydro. year (Jul. - Jun.)'] = (12, 6)
     return seasons_params
