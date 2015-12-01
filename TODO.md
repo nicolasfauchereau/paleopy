@@ -3,7 +3,7 @@
 - [x] add "April-March" to the list of seasons available
 - [ ] plot proxy(ies) location on the composite maps
 - [ ] proxy dependent symbol
-- [ ] the proxy type (i.e. "Tree-ring", "speleotheme", "coral core") should
+- [x] the proxy type (i.e. "Tree-ring", "speleotheme", "coral core") should
 be an argument of the proxy class instance
 - [ ] 1 map per year for proxy to be implemented (e.g. NZ region)
 - [x] rename label "Kidson Type" to "New Zealand" in the heatmap and bar plots
