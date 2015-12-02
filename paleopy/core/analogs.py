@@ -135,7 +135,7 @@ class analogs:
                                                      str(self.climatology[1])))
         
         # calculate the anomalies WRT the climatology
-        compos = compos - clim.mean('dates')
+        compos_m = compos - clim.mean('dates')
         
         # calculate the anomalies WRT the climatology, unique years
         compos_u = compos_u - clim.mean('dates')
@@ -143,7 +143,7 @@ class analogs:
         # mask if needed
         compos_u = ma.masked_array(compos_u, np.isnan(compos_u))
         
-        compos = ma.masked_array(compos, np.isnan(compos))
+        compos_m = ma.masked_array(compos_m, np.isnan(compos))
 
         # if test is True, then the standard Student t-test is calculated
         if test:
@@ -162,7 +162,7 @@ class analogs:
         self.dset['composite_sample'] = \
         (('years','latitudes', 'longitudes'), compos_u)
         self.dset['composite_anomalies'] = \
-        (('latitudes', 'longitudes'), compos.mean(0).data)
+        (('latitudes', 'longitudes'), compos_m.mean(0).data)
         # saves the p-values
         self.dset['pvalues'] = \
         (('latitudes', 'longitudes'), pvalues)
