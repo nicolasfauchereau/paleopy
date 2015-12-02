@@ -21,11 +21,13 @@ class indices():
         with open(os.path.join(self.parent.djsons, 'indices.json'), 'r') as f:
             dict_json = json.loads(f.read())
         if self.name is not None:
-            data = pd.read_csv(dict_json[self.name]['path'], index_col=0, parse_dates=True)
-            data = pd.rolling_mean(data, s_pars[0])
-            data.dropna(inplace=True)
-            data = data[data.index.month == s_pars[1]]
-            data = data.apply(zscore)
+            data = {}
+            mat = pd.read_csv(dict_json[self.name]['path'], index_col=0, parse_dates=True)
+            mat = pd.rolling_mean(mat, s_pars[0])
+            mat.dropna(inplace=True)
+            mat = mat[mat.index.month == s_pars[1]]
+            mat = mat.apply(zscore)
+            data[self.name] = mat
         else:
             data = {}
             for k in dict_json.keys():
@@ -51,6 +53,10 @@ class indices():
         self.compos = compos
 
     def _plot_df(self, df, ax, ax_n = 0, pval = None):
+        """
+        plots a boxplot for one Series or a DataFrame with
+        one column (one index)
+        """
 
         b = df.boxplot(ax = ax, widths=0.85, patch_artist=True)
 
@@ -76,8 +82,7 @@ class indices():
                 ax.set_title("p={:4.2f}\n$\mu$={:4.2f}$\sigma$={:4.2f}".format(pval, \
                 df.mean().values[0], \
                 df.std().values[0]), \
-                fontsize=12, \
-                fontweight='bold')
+                fontsize=12)
             else:
                 ax.set_title("p={:4.2f}\n$\mu$={:4.2f}\n$\sigma$={:4.2f}".format(pval, \
                 df.mean().values[0], \
@@ -92,7 +97,7 @@ class indices():
 
         if isinstance(self.compos, pd.core.frame.DataFrame):
 
-            l = len(self.compos.columns())
+            l = len(self.compos.columns)
             f, axes = plt.subplots(nrows=1, ncols=l, figsize=(l,6), sharey=True)
             f.subplots_adjust(wspace=0.0, left=0.15, bottom=0.05, top=0.87)
             axes = axes.flatten('F')

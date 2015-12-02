@@ -7,6 +7,7 @@ import bottleneck  as bn
 from matplotlib.mlab import detrend_linear
 from scipy.stats import ttest_ind
 from ..utils import seasons_params
+# from utils import seasons_params
 
 class analogs:
     """
@@ -119,64 +120,70 @@ class analogs:
         """
         self.climatology = climatology
 
-        # we forgot to calculate the seasonal aggregate
+        # if we forgot to calculate the seasonal aggregate
         if not(hasattr(self, 'dset')):
             self.calculate_season()
 
-        lyears = self.analog_years
-        index = self.dset.dates.to_index()
-
-        aseas = []
-        # getting all the indices corresponding to years in 'analog_years'
-        # for the season of interest, repeats are allowed
-        for y in self.analog_years:
-            aseas.append( np.where( (index.year == y) )[0][0] )
-
-        # taking the composite
-        self.compos = np.take(self.dset['seas_var'].data, aseas, axis=0)
+        # extract the composite sample: it INCLUDES the repeated years
+        compos = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in self.analog_years], dim='dates')
+        
+        # extract the composite sample EXCLUDING the repeated years
+        compos_u = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in np.unique(self.analog_years)], dim='dates')
 
         # calculating the climatology
         clim = self.dset['seas_var'].sel(dates=slice(str(self.climatology[0]), \
                                                      str(self.climatology[1])))
+        
+        # calculate the anomalies WRT the climatology
+        compos = compos - clim.mean('dates')
+        
+        # calculate the anomalies WRT the climatology, unique years
+        compos_u = compos_u - clim.mean('dates')
 
-        self.clim = clim.data
-
-        composite = self.compos.mean(0) - self.clim.mean(0)
-
-        composite = ma.masked_array(composite, np.isnan(composite))
+        # mask if needed
+        compos_u = ma.masked_array(compos_u, np.isnan(compos_u))
+        
+        compos = ma.masked_array(compos, np.isnan(compos))
 
         # if test is True, then the standard Student t-test is calculated
         if test:
-            t, pvalues = ttest_ind(self.compos, self.clim, axis=0)
+            t, pvalues = ttest_ind(compos.data, clim.data, axis=0)
             # pvalues contains the p-values, we can delete the Test statistics
             del(t)
 
-        # if there is a mask, we multiply the composite anomalies by it
-#         if 'mask' in self.dset.data_vars:
-#             mask = self.dset['mask'].data
-#             # saves the composite anomalies
-#             self.dset['composite_anomalies'] = \
-#             (('latitudes', 'longitudes'), composite * mask)
-#             # saves the p-values
-#             self.dset['pvalues'] = \
-#             (('latitudes', 'longitudes'), pvalues)
-#         else:
-        # saves the composite anomalies
+        # we drop the time and dates dimensions, which has 
+        # for effect to drop all the variables that depend on them
+        self.dset = self.dset.drop(('dates','time'))
+        
+        # store the anomalies and the composite anomalies
+        # in the xray Dataset 
+        
+        self.dset['years'] = (('years',), np.unique(self.analog_years))
+        self.dset['composite_sample'] = \
+        (('years','latitudes', 'longitudes'), compos_u)
         self.dset['composite_anomalies'] = \
-        (('latitudes', 'longitudes'), composite)
+        (('latitudes', 'longitudes'), compos.mean(0).data)
         # saves the p-values
         self.dset['pvalues'] = \
         (('latitudes', 'longitudes'), pvalues)
-
+        # set the attributes
+        self.dset['latitudes'].attrs['units'] = 'degrees_north'
+        self.dset['latitudes'].attrs['long_name'] = 'Latitudes'
+        self.dset['latitudes'].attrs['axis'] = 'Y'
+        self.dset['longitudes'].attrs['units'] = 'degrees_east'
+        self.dset['longitudes'].attrs['long_name'] = 'Longitudes'
+        self.dset['longitudes'].attrs['axis'] = 'X'
+        self.dset['composite_sample'].attrs['missing_value'] = -999.9
+        self.dset['composite_sample'].attrs['_FillValue'] = -999.9
+        self.dset['composite_anomalies'].attrs['missing_value'] = -999.9
+        self.dset['composite_anomalies'].attrs['_FillValue'] = -999.9
+        
         return self
 
     def save_to_file(self, fname=None):
-        nc = self.dset[['composite_anomalies', 'pvalues']]
+        nc = self.dset[['composite_sample','composite_anomalies', 'pvalues']]
         nc = nc.to_netcdf(fname)
-
-    def close(self):
-        """
-        implements a `close` method to close the open datasets
-        and quit cleanly
-        """
+        self.dset.close()
+        
+    def close(self): 
         self.dset.close()

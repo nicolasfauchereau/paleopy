@@ -71,18 +71,31 @@ class scalar_plot:
         latitudes = self.dset_domain['latitudes'].data
         longitudes = self.dset_domain['longitudes'].data
 
-        # get the data (analogsite anomalies)
+        # get the data (composite_anomalies and pvalues)
         mat = self.dset_domain['composite_anomalies'].data
         pvalues = self.dset_domain['pvalues'].data
 
         if not(self.proj):
             self.proj = 'cyl'
-        if self.proj in ['merc', 'cyl']:
+        if self.proj in ['cyl', 'merc']:
+            """
+            NOTE: using a Mercator projection won't work if either / both
+            the northermost / southermost latitudes are 90 / -90
+
+            if one wants (but why would you do that ?) to plot a global
+            domain in merc, one needs to pass:
+
+            domain = [0., 360., -89.9, 89.9]
+
+            to the `scalar_plot` class
+
+            Any sub-domain of a global domain will work fine
+            """
             m = bm(projection=self.proj,llcrnrlat=latitudes.min(),urcrnrlat=latitudes.max(),\
                 llcrnrlon=longitudes.min(),urcrnrlon=longitudes.max(),\
                 lat_ts=0, resolution=self.res)
         if self.proj == 'moll':
-            m = bm(projection='moll',lon_0=180, resolution=res)
+            m = bm(projection='moll',lon_0=180, resolution=self.res)
         if self.proj in ['npstere','spstere']:
             m = bm(projection=self.proj,boundinglat=0,lon_0=0, resolution=self.res, round=True)
             # we add cyclic longitude
