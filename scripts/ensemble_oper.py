@@ -98,7 +98,7 @@ f.savefig(os.path.join(opath, 'indices_ensemble.png'))
 WEATHER REGIMES
 """
 
-w = WR(ens, classification='Kidson Types')
+w = WR(ens, classification='New Zealand')
 
 w.probs_anomalies(kind='many')
 
