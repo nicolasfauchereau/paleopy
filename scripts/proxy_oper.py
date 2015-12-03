@@ -32,6 +32,9 @@ help='the path where to save the figures')
 parser.add_argument('-n','--name', dest='sitename', type=str, default='Rarotonga', \
 help='the name of the site')
 
+parser.add_argument('-t','--type', dest='proxy_type', type=str, default='Coral core', \
+help='the type of proxy (coral, Tree-ring, etc)')
+
 parser.add_argument('-lon','--longitude', dest='lon', type=float, default=-159.82, \
 help='the longitude (decimal degree) of the proxy site')
 
