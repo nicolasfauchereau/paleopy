@@ -39,6 +39,10 @@ goes from argparse Namespace to a dictionnary or key / value arguments
 
 vargs = vars(parser.parse_args())
 
+"""
+pop `opath` (the path where the outputs are saved) out of the dictionnary
+"""
+
 opath = vargs.pop('opath')
 
 """

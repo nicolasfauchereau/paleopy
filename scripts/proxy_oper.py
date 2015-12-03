@@ -72,6 +72,10 @@ goes from argparse Namespace to a dictionnary or key / value arguments
 
 vargs = vars(parser.parse_args())
 
+"""
+pop `opath` (the path where the outputs are saved) out of the dictionnary
+"""
+
 opath = vargs.pop('opath')
 
 """
@@ -80,21 +84,16 @@ instantiates a proxy class, pass the `vargs` dict of keyword arguments to the cl
 
 p = proxy(**vargs)
 
-# p = proxy(sitename, lon, lat, dpath=dpath, dataset=dataset, variable=variable,
-#           season=season, value=value, period=period, climatology=climatology, calc_anoms=calc_anoms, detrend=detrend)
-
-
 """
 process the proxy
 """
-
 
 p.extract_ts()
 p.calculate_season()
 p.find_analogs()
 f = p.plot_season_ts()
 p.proxy_repr()
-f.savefig(os.path.join(opath,'essai.png'))
+f.savefig(os.path.join(opath,'time_series.png'))
 
 """
 instantiate the analog classes with the proxy for each dataset + variable we
