@@ -14,10 +14,10 @@ setup(name='paleopy',
                 'paleopy.markov',
                 'paleopy.utils',
                 ],
-      license='GPLv3',
+      license='MIT',
       platforms='any',
       classifiers=[
-          'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+          'License :: MIT',
           'Programming Language :: Python :: 3',
       ],
       long_description="""
