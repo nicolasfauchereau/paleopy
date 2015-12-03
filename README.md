@@ -19,8 +19,8 @@ of proxies* (`ensemble_oper.py`) from user input passed to the command line.
 ```
 → ./proxy_oper.py --help
 usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-o OPATH] [-n SITENAME]
-                     [-lon LON] [-lat LAT] [-dset DATASET] [-var VARIABLE]
-                     [-s SEASON] [-val VALUE] [-per PERIOD]
+                     [-t PROXY_TYPE] [-lon LON] [-lat LAT] [-dset DATASET]
+                     [-var VARIABLE] [-s SEASON] [-val VALUE] [-per PERIOD]
                      [-clim CLIMATOLOGY] [-an CALC_ANOMS] [-dt DETREND]
 
 optional arguments:
@@ -34,6 +34,8 @@ optional arguments:
                         the path where to save the figures
   -n SITENAME, --name SITENAME
                         the name of the site
+  -t PROXY_TYPE, --type PROXY_TYPE
+                        the type of proxy (Coral core, Tree-ring, etc)
   -lon LON, --longitude LON
                         the longitude (decimal degree) of the proxy site
   -lat LAT, --latitude LAT
