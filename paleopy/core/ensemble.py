@@ -81,7 +81,7 @@ class ensemble:
             self.detrend = self.detrend[0]
 
         if len(set(tuple(x) for x in climatologies)) > 1:
-            print("""ERROR! detrend set to True for some proxies but False for others""")
-            raise Exception("DETREND ERROR")
+            print("""ERROR! the climatologies are not identical between the proxies""")
+            raise Exception("VLIMATOLOGY ERROR")
         else:
             self.climatology = climatologies[0]

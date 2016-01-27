@@ -121,8 +121,12 @@ class proxy:
             the dating convention
             user-defined, no default
 
-    calendar : int
+    calendar : string
             calendar year
+            user-defined, no default
+
+    chronology : string
+            the chronology control (i.e. 14C, Historic, Dendrochronology, etc)
             user-defined, no default
 
     measurement : string
@@ -133,7 +137,7 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
@@ -150,6 +154,7 @@ class proxy:
         self.dataset = dataset
         self.variable = variable
         self.dating_convention = dating_convention
+        self.chronology = chronology
         self.calendar = calendar
         self.season = season
         self.value = value
@@ -311,6 +316,7 @@ class proxy:
         proxy_dict['measurement'] = self.measurement
         proxy_dict['dating'] = self.dating
         proxy_dict['calendar'] = self.calendar
+        proxy_dict['chronology'] = self.chronology
 
         proxy_dict['coords'] = self.coords
         proxy_dict['aspect'] = self.aspect

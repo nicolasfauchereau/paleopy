@@ -76,8 +76,11 @@ help='the elevation (in meters)')
 parser.add_argument('-dc','--dating', dest='dating_convention', type=str, default=None, \
 help='the dating convention')
 
-parser.add_argument('-cal','--calendar', dest='calendar', type=int, default=None, \
+parser.add_argument('-cal','--calendar', dest='calendar', type=str, default=None, \
 help='the calendar year')
+
+parser.add_argument('-ch','--chronology', dest='chronology', type=str, default=None, \
+help='the chronology control (i.e. 14C, Historic, Dendrochronology, etc)')
 
 parser.add_argument('-m','--measurement', dest='measurement', type=str, default=None, \
 help='the proxy measurement type (e.g. width for tree rings)')
