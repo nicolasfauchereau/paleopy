@@ -32,6 +32,8 @@ usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-o OPATH] [-n SITENAME]
                      [-t PROXY_TYPE] [-lon LON] [-lat LAT] [-dset DATASET]
                      [-var VARIABLE] [-s SEASON] [-val VALUE] [-per PERIOD]
                      [-clim CLIMATOLOGY] [-an CALC_ANOMS] [-dt DETREND]
+                     [-a ASPECT] [-e ELEVATION] [-dc DATING_CONVENTION]
+                     [-cal CALENDAR] [-ch CHRONOLOGY] [-m MEASUREMENT]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -45,7 +47,7 @@ optional arguments:
   -n SITENAME, --name SITENAME
                         the name of the site
   -t PROXY_TYPE, --type PROXY_TYPE
-                        the type of proxy (Coral core, Tree-ring, etc)
+                        the type of proxy (coral, Tree-ring, etc)
   -lon LON, --longitude LON
                         the longitude (decimal degree) of the proxy site
   -lat LAT, --latitude LAT
@@ -71,6 +73,19 @@ optional arguments:
   -dt DETREND, --detrend DETREND
                         True if the time-series need detrended, False
                         otherwise. Default is True
+  -a ASPECT, --aspect ASPECT
+                        the aspect (in degrees, from 0 to 360)
+  -e ELEVATION, --elevation ELEVATION
+                        the elevation (in meters)
+  -dc DATING_CONVENTION, --dating DATING_CONVENTION
+                        the dating convention
+  -cal CALENDAR, --calendar CALENDAR
+                        the calendar year
+  -ch CHRONOLOGY, --chronology CHRONOLOGY
+                        the chronology control (i.e. 14C, Historic,
+                        Dendrochronology, etc)
+  -m MEASUREMENT, --measurement MEASUREMENT
+                        the proxy measurement type (e.g. width for tree rings)
 ```
 
 + **ensemble_oper.py**
