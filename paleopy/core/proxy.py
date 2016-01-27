@@ -27,32 +27,46 @@ class proxy:
     ----------
 
     sitename : string
-            The name of the proxy site, no default
+            The name of the proxy site
+            user-defined, no default
 
-    proxy_type : the type of proxy, no default
+    proxy_type : string
+            the type of proxy
             can be e.g.:
             "Tree-ring"
             "Speleotheme"
             "Coral core"
+            user-defined, no default
+
     lon : float
             The longitude (in decimal degrees) of the site
+            user-defined, no default
+
     lat : float
             The latitude (in decimal degrees) of the site
+            user-defined, no default
+
     djsons : string
             The path to the json files defining the paths
             and parameters arrached to each dataset + variable
+            defined by the frontend in PICT, default is ./jsons
+
     pjsons : string
             The path where to save the individual proxy json files
+            defined by the frontend in PICT, default is ./jsons/proxies
+
     dataset : string
             The dataset to load to look for analogs, see
             the `datasets.json` file for a list of the available
             datasets (e.g. `ersst`, 'ncep', `gpcp`)
-            default is `ersst`
+            user-defined, default is `ersst`
+
     variable : string
             The variable to extract from the dataset to look for analogs, see
             the `datasets.json` file for a list of variables available for
             each dataset (e.g. for `ncep` dataset: `hgt_1000, hgt_850` etc
-            default is `sst`
+            user-defined, default is `sst`
+
     season : string
             The season to which the proxy is sensitive, can be:
             - any of `DJF`, `JFM`, `FMA`, ..
@@ -60,18 +74,26 @@ class proxy:
             - `Cold Season (Jun. - Nov.)`
             - `Year (Jan. - Dec.)`
             - `Hydro. year (Jul. - Jun.)`
-            default is `DJF`
+            user-defined, default is `DJF`
+
     value : float or integer or string
             The value attached to the proxy
             if string, must be in ['WB', 'B', 'N', 'A', 'WA']
             for Well-Below, Below, etc and will be taken
             as the category of anomalies WRT to present conditions
+            user-defined, no default
+
     period : tuple of integers
             The period from which the analogs can be taken in a
             given dataset. Default is (1979, 2014)
+            user-defined, default is full period for the dataset
+            interogated
+
     climatology : tuple of integers
             The climatological period with respect to which the
             anomalies (if `calc_anoms == True`) are calculated
+            user-defined, default is 1981-2010
+
     calc_anoms : boolean
             If `True`, the anomalies are calculated before the analog
             years are determined: The `value` parameter needs to represent
@@ -79,16 +101,39 @@ class proxy:
             If `False`, the analog years are determined from the raw seasonal
             time-series: The `value` parameter needs to represent a raw value
             (i.e. a rainfall amount, a mean temperature)
+            user-defined, default is True
+
     detrend : boolean
             If `True` the linear trend is removed from the time-series
             before the analog years are determined, if `False`, nothing is
             done
+            user-defined, default is True
+
+    aspect : float
+            The aspect of the proxy site (in degrees from 0 to 360)
+            user-defined, no default
+
+    elevation : float
+            The elevation of the proxy site (in meters)
+            user-defined, no default
+
+    dating_convention : string
+            the dating convention
+            user-defined, no default
+
+    calendar : int
+            calendar year
+            user-defined, no default
+
+    measurement : string
+            the proxy measurement type (e.g. width for tree rings)
+            user-defined, no default
 
     Attributes
     ----------
     """
 
-    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
@@ -96,11 +141,16 @@ class proxy:
         self.description = 'proxy'
         self.sitename = sitename
         self.proxy_type = proxy_type
+        self.measurement = measurement
         self.coords = (lon, lat)
+        self.aspect = aspect
+        self.elevation = elevation
         self.djsons = djsons
         self.pjsons = pjsons
         self.dataset = dataset
         self.variable = variable
+        self.dating_convention = dating_convention
+        self.calendar = calendar
         self.season = season
         self.value = value
         self.period = period
@@ -255,7 +305,17 @@ class proxy:
         proxy_dict = od()
         proxy_dict['sitename'] = self.sitename
         proxy_dict['proxy_type'] = self.proxy_type
+        proxy_dict['measurement'] = self.proxy_type
+        proxy_dict['proxy_type'] = self.proxy_type
+        proxy_dict['proxy_type'] = self.proxy_type
+        proxy_dict['measurement'] = self.measurement
+        proxy_dict['dating'] = self.dating
+        proxy_dict['calendar'] = self.calendar
+
         proxy_dict['coords'] = self.coords
+        proxy_dict['aspect'] = self.aspect
+        proxy_dict['elevation'] = self.elevation
+
         proxy_dict['season'] = self.season
         proxy_dict['dataset'] = self.dataset
         proxy_dict['variable'] = self.variable

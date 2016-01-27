@@ -65,6 +65,22 @@ help='True if the anomalies are calculated, False otherwise. Default is True')
 parser.add_argument('-dt','--detrend', dest='detrend', type=bool, default=True, \
 help='True if the time-series need detrended, False otherwise. Default is True')
 
+# new arguments as from the 27 of January 2016
+
+parser.add_argument('-a','--aspect', dest='aspect', type=float, default=None, \
+help='the aspect (in degrees, from 0 to 360)')
+
+parser.add_argument('-e','--elevation', dest='elevation', type=float, default=None, \
+help='the elevation (in meters)')
+
+parser.add_argument('-dc','--dating', dest='dating_convention', type=str, default=None, \
+help='the dating convention')
+
+parser.add_argument('-cal','--calendar', dest='calendar', type=int, default=None, \
+help='the calendar year')
+
+parser.add_argument('-m','--measurement', dest='measurement', type=str, default=None, \
+help='the proxy measurement type (e.g. width for tree rings)')
 
 """
 goes from argparse Namespace to a dictionnary or key / value arguments
