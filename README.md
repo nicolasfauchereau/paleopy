@@ -3,10 +3,20 @@
 classes and methods to calculate and plot analog composites from
 a paleoclimate proxy or an ensemble of paleoclimate proxies
 
+- [Installing paleopy](#Installing-paleopy)
 - [Calling paleopy from a script](#calling-paleopy-from-a-script)
 - [Jupyter notebooks examples](#jupyter-notebooks-examples)
 
 <hr>
+
+## Installing paleopy
+
+[]() paleopy is written in pure python, and can be installed by running
+
+```
+python setup.py install
+```
+in the top-level directory
 
 ## calling paleopy from a script  
 <br>
