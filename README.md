@@ -11,7 +11,7 @@ a paleoclimate proxy or an ensemble of paleoclimate proxies
 
 ## Installing paleopy
 
-[]() paleopy is written in pure python, and can be installed by running
+[paleopy](https://github.com/nicolasfauchereau/paleopy) is written in pure python, and can be installed by running
 
 ```
 python setup.py install
