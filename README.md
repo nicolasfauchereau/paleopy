@@ -34,6 +34,7 @@ usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-o OPATH] [-n SITENAME]
                      [-clim CLIMATOLOGY] [-an CALC_ANOMS] [-dt DETREND]
                      [-a ASPECT] [-e ELEVATION] [-dc DATING_CONVENTION]
                      [-cal CALENDAR] [-ch CHRONOLOGY] [-m MEASUREMENT]
+                     [-f FILENAME]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -86,6 +87,9 @@ optional arguments:
                         Dendrochronology, etc)
   -m MEASUREMENT, --measurement MEASUREMENT
                         the proxy measurement type (e.g. width for tree rings)
+  -f FILENAME, --proxy_file_name FILENAME
+                        the name for the json file with the metadata for the
+                        proxy. If not specify, the site name would be used.
 ```
 
 + **ensemble_oper.py**
