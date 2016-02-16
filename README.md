@@ -28,12 +28,13 @@ of proxies* (`ensemble_oper.py`) from user input passed to the command line.
 
 ```
 → ./proxy_oper.py --help
-usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-o OPATH] [-n SITENAME]
-                     [-t PROXY_TYPE] [-lon LON] [-lat LAT] [-dset DATASET]
-                     [-var VARIABLE] [-s SEASON] [-val VALUE] [-per PERIOD]
-                     [-clim CLIMATOLOGY] [-an CALC_ANOMS] [-dt DETREND]
-                     [-a ASPECT] [-e ELEVATION] [-dc DATING_CONVENTION]
-                     [-cal CALENDAR] [-ch CHRONOLOGY] [-m MEASUREMENT]
+usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-pn PFNAME] [-o OPATH]
+                     [-n SITENAME] [-t PROXY_TYPE] [-lon LON] [-lat LAT]
+                     [-dset DATASET] [-var VARIABLE] [-s SEASON] [-val VALUE]
+                     [-per PERIOD] [-clim CLIMATOLOGY] [-an CALC_ANOMS]
+                     [-dt DETREND] [-a ASPECT] [-e ELEVATION]
+                     [-dc DATING_CONVENTION] [-cal CALENDAR] [-ch CHRONOLOGY]
+                     [-m MEASUREMENT]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -42,6 +43,9 @@ optional arguments:
                         parameters of each dataset
   -pj PJSONS, --pjsons PJSONS
                         the path where to save the individual proxy json files
+  -pn PFNAME, --pfname PFNAME
+                        the name of the JSON file containing the information
+                        for a single proxy
   -o OPATH, --opath OPATH
                         the path where to save the figures
   -n SITENAME, --name SITENAME
@@ -86,6 +90,7 @@ optional arguments:
                         Dendrochronology, etc)
   -m MEASUREMENT, --measurement MEASUREMENT
                         the proxy measurement type (e.g. width for tree rings)
+
 ```
 
 + **ensemble_oper.py**
