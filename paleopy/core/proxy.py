@@ -55,6 +55,10 @@ class proxy:
             The path where to save the individual proxy json files
             defined by the frontend in PICT, default is ./jsons/proxies
 
+    pfname : string
+            the name of the JSON file containing the information
+            for a single proxy, no default
+
     dataset : string
             The dataset to load to look for analogs, see
             the `datasets.json` file for a list of the available
@@ -151,6 +155,7 @@ class proxy:
         self.elevation = elevation
         self.djsons = djsons
         self.pjsons = pjsons
+        self.pfname = pfname
         self.dataset = dataset
         self.variable = variable
         self.dating_convention = dating_convention
@@ -340,11 +345,18 @@ class proxy:
             pprint_od(proxy_dict)
 
         if outfile:
-            proxy_name = self.sitename.replace(" ","_")
-            proxy_name = proxy_name.replace(".","")
-            #proxy_name =
-            fname = "{}.json".format(self.sitename.replace(" ","_"))
-            with open(os.path.join(self.pjsons, fname),'w') as f:
+            # the name of the JSON file used to be created from the
+            # proxy name
+            # --------------------------------------------------------
+            # proxy_name = self.sitename.replace(" ","_")
+            # proxy_name = proxy_name.replace(".","")
+            #fname = "{}.json".format(self.sitename.replace(" ","_"))
+            # now the name of the JSON file is a parameter that is
+            # passed to the script "proxy_oper" by the PHP layer
+            # --------------------------------------------------------
+
+            #with open(os.path.join(self.pjsons, fname),'w') as f:
+            with open(os.path.join(self.pjsons, self.pfname),'w') as f:
                 json.dump(proxy_dict, f)
         self.proxy_dict = proxy_dict
 
