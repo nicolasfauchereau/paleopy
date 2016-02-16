@@ -1,1 +1,280 @@
-{"vcsn": {"Rain": {"domain": [166.4, 178.5, -47.4, -34.4], "description": "cumulative seasonal precipitation", "path": "/Users/nicolasf/CODE/paleopy/data/VCSN_monthly_Rain_1972_2014_grid.nc", "units": "mm", "valid_period": [1972, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.BrBG_11.mpl_colormap"}}, "TMean": {"domain": [166.4, 178.5, -47.4, -34.4], "description": "Mean temperature", "path": "/Users/nicolasf/CODE/paleopy/data/VCSN_monthly_TMean_1972_2014_grid.nc", "units": "degrees C.", "valid_period": [1972, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.RdBu_11_r.mpl_colormap"}}}, "ersst": {"sst": {"domain": [0, 360, -90, 90], "description": "Sea Surface Temperature (SST)", "path": "/Users/nicolasf/CODE/paleopy/data/ERSST_monthly_SST_1948_2014.nc", "units": "degrees C.", "valid_period": [1972, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.RdBu_11_r.mpl_colormap"}}}, "ncep": {"hgt_200": {"domain": [0, 360, -90, 90], "description": "geopotential at 200 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_hgt_1948_2014.nc", "units": "meters", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap"}}, "Tmean": {"domain": [0, 360, -90, 90], "description": "Mean Temperature at 2m.", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_Tmean_1948_2014.nc", "units": "degrees C.", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.RdBu_11_r.mpl_colormap"}}, "uwnd_850": {"domain": [0, 360, -90, 90], "description": "zonal wind at 850 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"}}, "omega_500": {"domain": [0, 360, -90, 90], "description": "Omega at 500 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_omega_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PuOr_11.mpl_colormap"}}, "vwnd_1000": {"domain": [0, 360, -90, 90], "description": "meridional wind at 1000 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"}}, "hgt_850": {"domain": [0, 360, -90, 90], "description": "geopotential at 800 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_hgt_1948_2014.nc", "units": "meters", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap"}}, "uwnd_1000": {"domain": [0, 360, -90, 90], "description": "zonal wind at 1000 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"}}, "vwnd_850": {"domain": [0, 360, -90, 90], "description": "meridional wind at 850 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"}}, "uwnd_200": {"domain": [0, 360, -90, 90], "description": "zonal wind at 200 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"}}, "hgt_1000": {"domain": [0, 360, -90, 90], "description": "geopotential at 1000 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_hgt_1948_2014.nc", "units": "meters", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap"}}, "vwnd_200": {"domain": [0, 360, -90, 90], "description": "meridional wind at 200 hPa", "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc", "units": "m/s", "valid_period": [1948, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"}}}, "gpcp": {"Rain": {"domain": [0, 360, -90, 90], "description": "Average Monthly Rate of Precipitation", "path": "/Users/nicolasf/CODE/paleopy/data/GPCP_monthly_Rain_1979_2014.nc", "units": "mm/day", "valid_period": [1979, 2014], "plot": {"cmap": "palettable.colorbrewer.diverging.BrBG_11.mpl_colormap"}}}}
+{
+  "vcsn": {
+    "Rain": {
+      "domain": [
+        166.4,
+        178.5,
+        -47.4,
+        -34.4
+      ],
+      "description": "cumulative seasonal precipitation",
+      "path": "/Users/nicolasf/CODE/paleopy/data/VCSN_monthly_Rain_1972_2014_grid.nc",
+      "units": "mm",
+      "valid_period": [
+        1972,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.BrBG_11.mpl_colormap"
+      }
+    },
+    "TMean": {
+      "domain": [
+        166.4,
+        178.5,
+        -47.4,
+        -34.4
+      ],
+      "description": "Mean temperature",
+      "path": "/Users/nicolasf/CODE/paleopy/data/VCSN_monthly_TMean_1972_2014_grid.nc",
+      "units": "degrees C.",
+      "valid_period": [
+        1972,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.RdBu_11_r.mpl_colormap"
+      }
+    }
+  },
+  "ersst": {
+    "sst": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "Sea Surface Temperature (SST)",
+      "path": "/Users/nicolasf/CODE/paleopy/data/ERSST_monthly_SST_1948_2014.nc",
+      "units": "degrees C.",
+      "valid_period": [
+        1972,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.RdBu_11_r.mpl_colormap"
+      }
+    }
+  },
+  "ncep": {
+    "hgt_200": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "geopotential at 200 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_hgt_1948_2014.nc",
+      "units": "meters",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap"
+      }
+    },
+    "Tmean": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "Mean Temperature at 2m.",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_Tmean_1948_2014.nc",
+      "units": "degrees C.",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.RdBu_11_r.mpl_colormap"
+      }
+    },
+    "uwnd_850": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "zonal wind at 850 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"
+      }
+    },
+    "omega_500": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "Omega at 500 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_omega_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PuOr_11.mpl_colormap"
+      }
+    },
+    "vwnd_1000": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "meridional wind at 1000 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"
+      }
+    },
+    "hgt_850": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "geopotential at 800 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_hgt_1948_2014.nc",
+      "units": "meters",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap"
+      }
+    },
+    "uwnd_1000": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "zonal wind at 1000 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"
+      }
+    },
+    "vwnd_850": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "meridional wind at 850 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"
+      }
+    },
+    "uwnd_200": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "zonal wind at 200 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"
+      }
+    },
+    "hgt_1000": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "geopotential at 1000 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_hgt_1948_2014.nc",
+      "units": "meters",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap"
+      }
+    },
+    "vwnd_200": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "meridional wind at 200 hPa",
+      "path": "/Users/nicolasf/CODE/paleopy/data/NCEP1_monthly_wind_1948_2014.nc",
+      "units": "m/s",
+      "valid_period": [
+        1948,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.PRGn_11.mpl_colormap"
+      }
+    }
+  },
+  "gpcp": {
+    "Rain": {
+      "domain": [
+        0,
+        360,
+        -90,
+        90
+      ],
+      "description": "Average Monthly Rate of Precipitation",
+      "path": "/Users/nicolasf/CODE/paleopy/data/GPCP_monthly_Rain_1979_2014.nc",
+      "units": "mm/day",
+      "valid_period": [
+        1979,
+        2014
+      ],
+      "plot": {
+        "cmap": "palettable.colorbrewer.diverging.BrBG_11.mpl_colormap"
+      }
+    }
+  }
+}
