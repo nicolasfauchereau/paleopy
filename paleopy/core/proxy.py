@@ -55,6 +55,10 @@ class proxy:
             The path where to save the individual proxy json files
             defined by the frontend in PICT, default is ./jsons/proxies
 
+    pfname : string
+            the name of the JSON file containing the information
+            for a single proxy, no default
+
     dataset : string
             The dataset to load to look for analogs, see
             the `datasets.json` file for a list of the available
@@ -137,7 +141,7 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
@@ -151,6 +155,7 @@ class proxy:
         self.elevation = elevation
         self.djsons = djsons
         self.pjsons = pjsons
+        self.pfname = pfname
         self.dataset = dataset
         self.variable = variable
         self.dating_convention = dating_convention
@@ -303,7 +308,7 @@ class proxy:
         self.analog_years = subset.index.year
         self.quintiles = bins
 
-    def proxy_repr(self, pprint=False, outfile=True, pfname=None):
+    def proxy_repr(self, pprint=False, outfile=True):
         """
         proxy_dict is an OrderedDict
         """
@@ -340,11 +345,18 @@ class proxy:
             pprint_od(proxy_dict)
 
         if outfile:
-            if pfname is None:
-                fname = "{}.json".format(self.sitename.replace(" ","_"))
-            else:
-                fname = "{}.json".format(pfname.replace(" ","_"))
-            with open(os.path.join(self.pjsons, fname),'w') as f:
+            # the name of the JSON file used to be created from the
+            # proxy name
+            # --------------------------------------------------------
+            # proxy_name = self.sitename.replace(" ","_")
+            # proxy_name = proxy_name.replace(".","")
+            #fname = "{}.json".format(self.sitename.replace(" ","_"))
+            # now the name of the JSON file is a parameter that is
+            # passed to the script "proxy_oper" by the PHP layer
+            # --------------------------------------------------------
+
+            #with open(os.path.join(self.pjsons, fname),'w') as f:
+            with open(os.path.join(self.pjsons, self.pfname),'w') as f:
                 json.dump(proxy_dict, f)
         self.proxy_dict = proxy_dict
 
