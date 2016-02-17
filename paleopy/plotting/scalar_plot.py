@@ -11,7 +11,7 @@ class scalar_plot:
     methods to plot a scalar plot on a map
     """
     def __init__(self, analogs, center=None, robust=True, robust_percentile=1.0, \
-              vmin=None, vmax=None, cmap=None, grid=True, domain=None, proj=None, res='c', test=None, border=True):
+              vmin=None, vmax=None, cmap=None, grid=True, domain=None, proj=None, res='c', test=None, border=True, proxies_loc=False):
 
         self.analogs = analogs
         self.domain = domain
@@ -27,7 +27,7 @@ class scalar_plot:
         self.res = res
         self.test = test
         self.border = border
-
+        self.proxies_loc = proxies_loc
 
     def get_domain(self, domain):
 
@@ -196,6 +196,15 @@ class scalar_plot:
 
         # set the title from the description in the dataset + variable JSON entry
         ax.set_title(self.analogs.dset_dict['description'], fontsize=14)
+
+        # proxies_loc is True, we plot the proxies locations on the map
+        if self.proxies_loc:
+            locs = self.analogs.locations
+            for k in locs.keys():
+                lon, lat = locs[k]
+                if lon > 180:
+                    lon = 360. - lon
+                m.plot(lon, lat, marker='D', color='m', markersize=8, latlon=True)
 
         return f
 
