@@ -28,6 +28,14 @@ class analogs:
         self.season = self.parent.season
         self.analog_years = self.parent.analog_years
         self.detrend = self.parent.detrend
+        # wet get the location(s) (lon, lat) of the proxy
+        # or ensemble of proxies here
+        self.locations = {}
+        if self.parent.description == 'proxy':
+            self.locations[self.parent.sitename] = self.parent.extracted_coords
+        elif self.parent.description == 'ensemble':
+            for k in self.parent.dict_proxies.keys():
+                self.locations[k] = self.parent.dict_proxies[k]['extracted_coords']
 
     def _read_dset_params(self):
         """
@@ -126,23 +134,23 @@ class analogs:
 
         # extract the composite sample: it INCLUDES the repeated years
         compos = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in self.analog_years], dim='dates')
-        
+
         # extract the composite sample EXCLUDING the repeated years
         compos_u = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in np.unique(self.analog_years)], dim='dates')
 
         # calculating the climatology
         clim = self.dset['seas_var'].sel(dates=slice(str(self.climatology[0]), \
                                                      str(self.climatology[1])))
-        
+
         # calculate the anomalies WRT the climatology
         compos_m = compos - clim.mean('dates')
-        
+
         # calculate the anomalies WRT the climatology, unique years
         compos_u = compos_u - clim.mean('dates')
 
         # mask if needed
         compos_u = ma.masked_array(compos_u, np.isnan(compos_u))
-        
+
         compos_m = ma.masked_array(compos_m, np.isnan(compos))
 
         # if test is True, then the standard Student t-test is calculated
@@ -151,13 +159,13 @@ class analogs:
             # pvalues contains the p-values, we can delete the Test statistics
             del(t)
 
-        # we drop the time and dates dimensions, which has 
+        # we drop the time and dates dimensions, which has
         # for effect to drop all the variables that depend on them
         self.dset = self.dset.drop(('dates','time'))
-        
+
         # store the anomalies and the composite anomalies
-        # in the xray Dataset 
-        
+        # in the xray Dataset
+
         self.dset['years'] = (('years',), np.unique(self.analog_years))
         self.dset['composite_sample'] = \
         (('years','latitudes', 'longitudes'), compos_u)
@@ -177,13 +185,13 @@ class analogs:
         self.dset['composite_sample'].attrs['_FillValue'] = -999.9
         self.dset['composite_anomalies'].attrs['missing_value'] = -999.9
         self.dset['composite_anomalies'].attrs['_FillValue'] = -999.9
-        
+
         return self
 
     def save_to_file(self, fname=None):
         nc = self.dset[['composite_sample','composite_anomalies', 'pvalues']]
         nc = nc.to_netcdf(fname)
         self.dset.close()
-        
-    def close(self): 
+
+    def close(self):
         self.dset.close()

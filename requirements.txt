@@ -4,6 +4,7 @@ scipy==0.16.0
 pandas==0.17.0
 matplotlib==1.5.0
 basemap==1.0.7
+netCDF4==1.2.2
 xray==0.6.1
 bottleneck==1.0.0
 palettable==2.1.1

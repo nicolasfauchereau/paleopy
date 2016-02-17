@@ -26,6 +26,9 @@ help='the path to the jsons files defining the paths and parameters of each data
 parser.add_argument('-pj','--pjsons', dest='pjsons', type=str, default='../jsons/proxies', \
 help='the path where to save the individual proxy json files')
 
+parser.add_argument('-pn','--pfname', dest='pfname', type=str, default=None, \
+help='the name of the JSON file containing the information for a single proxy')
+
 parser.add_argument('-o','--opath', dest='opath', type=str, default='./outputs', \
 help='the path where to save the figures')
 
