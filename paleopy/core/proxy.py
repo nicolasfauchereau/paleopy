@@ -319,7 +319,7 @@ class proxy:
         proxy_dict['proxy_type'] = self.proxy_type
         proxy_dict['proxy_type'] = self.proxy_type
         proxy_dict['measurement'] = self.measurement
-        proxy_dict['dating'] = self.dating
+        proxy_dict['dating_convention'] = self.dating_convention
         proxy_dict['calendar'] = self.calendar
         proxy_dict['chronology'] = self.chronology
 
