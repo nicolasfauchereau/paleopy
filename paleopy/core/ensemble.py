@@ -65,7 +65,7 @@ class ensemble:
                 climatologies.append(d['climatology'])
                 self.dict_proxies[d['sitename']] = d
 
-        assert len(set(seasons)) > 1, "seasons in json files must be identical"
+        assert len(set(seasons)) == 1, "seasons in json files must be identical"
 
         if list(set(seasons))[0] != self.season:
             print("""ERROR! season in json files does not match the season passed
