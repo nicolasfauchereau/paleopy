@@ -303,7 +303,7 @@ class proxy:
         self.analog_years = subset.index.year
         self.quintiles = bins
 
-    def proxy_repr(self, pprint=False, outfile=True):
+    def proxy_repr(self, pprint=False, outfile=True, pfname=None):
         """
         proxy_dict is an OrderedDict
         """
@@ -340,10 +340,10 @@ class proxy:
             pprint_od(proxy_dict)
 
         if outfile:
-            proxy_name = self.sitename.replace(" ","_")
-            proxy_name = proxy_name.replace(".","")
-            #proxy_name =
-            fname = "{}.json".format(self.sitename.replace(" ","_"))
+            if pfname is None:
+                fname = "{}.json".format(self.sitename.replace(" ","_"))
+            else:
+                fname = "{}.json".format(pfname.replace(" ","_"))
             with open(os.path.join(self.pjsons, fname),'w') as f:
                 json.dump(proxy_dict, f)
         self.proxy_dict = proxy_dict
