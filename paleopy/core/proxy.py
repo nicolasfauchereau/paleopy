@@ -87,16 +87,16 @@ class proxy:
             as the category of anomalies WRT to present conditions
             user-defined, no default
 
-    period : tuple of integers
+    period : string
             The period from which the analogs can be taken in a
-            given dataset. Default is (1979, 2014)
+            given dataset. Default is "1979-2014"
             user-defined, default is full period for the dataset
             interogated
 
-    climatology : tuple of integers
+    climatology : string
             The climatological period with respect to which the
             anomalies (if `calc_anoms == True`) are calculated
-            user-defined, default is 1981-2010
+            user-defined, default is "1981-2010"
 
     calc_anoms : boolean
             If `True`, the anomalies are calculated before the analog
@@ -142,7 +142,7 @@ class proxy:
     """
 
     def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, qualitative=False, \
-                 period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
+                 period="1979-2014", climatology="1981-2010", calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
             lon += 360.
@@ -164,8 +164,8 @@ class proxy:
         self.season = season
         self.value = value
         self.qualitative = qualitative
-        self.period = period
-        self.climatology = climatology
+        self.period = tuple(map(int,period.split("-"))) # to correct the type
+        self.climatology = tuple(map(int,climatology.split("-"))) # to correct the type
         self.calc_anoms = calc_anoms
         self.detrend = detrend
 
@@ -297,6 +297,8 @@ class proxy:
         # if the flag qualitative is set to True (default is false)
         # then we search the years corresponding to the category
         if self.qualitative:
+            if val not in labels:
+                raise ValueError("category not in ['WB','B','N','A','WA']")
             subset = self.ts_seas[self.ts_seas['cat'] == val]
             self.category = val
         # if not, then we search in the bins
