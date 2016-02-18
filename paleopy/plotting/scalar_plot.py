@@ -202,8 +202,8 @@ class scalar_plot:
             locs = self.analogs.locations
             for k in locs.keys():
                 lon, lat = locs[k]
-                if lon > 180:
-                    lon = 360. - lon
+                if (lon > 180):
+                    lon -= 360.
                 m.plot(lon, lat, marker='D', color='m', markersize=8, latlon=True)
 
         return f

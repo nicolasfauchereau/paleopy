@@ -58,7 +58,8 @@ help="""the value for the proxy: can be either a float or a string, if a string,
 ['WB','B','N','A','WA'] and the `qualitative` flag must be set to True""")
 
 parser.add_argument('-q','--qualitative', dest='qualitative', type=bool, default=False, \
-help='the value for the proxy (can be either a float or a string)')
+help='a flag indicating whether the value passed (see above) is qualitative or not, default to False: \
+i.e. interpret the value as a float')
 
 parser.add_argument('-per','--period', dest='period', type=tuple, default=(1979, 2014), \
 help='the period from which to draw the analog seasons')
