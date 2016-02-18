@@ -141,7 +141,7 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, \
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, qualitative=False, \
                  period=(1979, 2014), climatology=(1981,2010), calc_anoms=True, detrend=True):
         super(proxy, self).__init__()
         if lon < 0:
@@ -163,6 +163,7 @@ class proxy:
         self.calendar = calendar
         self.season = season
         self.value = value
+        self.qualitative = qualitative
         self.period = period
         self.climatology = climatology
         self.calc_anoms = calc_anoms
@@ -293,12 +294,14 @@ class proxy:
 
         labels=['WB','B','N','A','WA']
         self.ts_seas.loc[:,'cat'], bins = pd.qcut(ts, 5, labels=labels, retbins=True)
-        # if value passed is a string, we get from the category
-        if isinstance(val, str):
+        # if the flag qualitative is set to True (default is false)
+        # then we search the years corresponding to the category
+        if self.qualitative:
             subset = self.ts_seas[self.ts_seas['cat'] == val]
             self.category = val
         # if not, then we search in the bins
         else:
+            val = np.float(val) # just to make sure val is of the right type
             bins[0] = -np.inf
             bins[-1] = np.inf
             category = labels[np.searchsorted(bins, val)-1]

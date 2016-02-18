@@ -31,8 +31,8 @@ of proxies* (`ensemble_oper.py`) from user input passed to the command line.
 usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-pn PFNAME] [-o OPATH]
                      [-n SITENAME] [-t PROXY_TYPE] [-lon LON] [-lat LAT]
                      [-dset DATASET] [-var VARIABLE] [-s SEASON] [-val VALUE]
-                     [-per PERIOD] [-clim CLIMATOLOGY] [-an CALC_ANOMS]
-                     [-dt DETREND] [-a ASPECT] [-e ELEVATION]
+                     [-q QUALITATIVE] [-per PERIOD] [-clim CLIMATOLOGY]
+                     [-an CALC_ANOMS] [-dt DETREND] [-a ASPECT] [-e ELEVATION]
                      [-dc DATING_CONVENTION] [-cal CALENDAR] [-ch CHRONOLOGY]
                      [-m MEASUREMENT]
 
@@ -64,6 +64,11 @@ optional arguments:
   -s SEASON, --season SEASON
                         the season to which the proxy is sensitive
   -val VALUE, --value VALUE
+                        the value for the proxy: can be either a float or a
+                        string, if a string, must be in
+                        ['WB','B','N','A','WA'] and the `qualitative` flag
+                        must be set to True
+  -q QUALITATIVE, --qualitative QUALITATIVE
                         the value for the proxy (can be either a float or a
                         string)
   -per PERIOD, --period PERIOD
@@ -90,7 +95,6 @@ optional arguments:
                         Dendrochronology, etc)
   -m MEASUREMENT, --measurement MEASUREMENT
                         the proxy measurement type (e.g. width for tree rings)
-
 ```
 
 + **ensemble_oper.py**

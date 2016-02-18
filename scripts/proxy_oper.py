@@ -1,4 +1,4 @@
-#!/Users/nicolasf/anaconda/bin/python
+#!/Users/nicolasf/anaconda25/anaconda/bin/python
 import os
 import sys
 import argparse
@@ -54,6 +54,10 @@ parser.add_argument('-s','--season', dest='season', type=str, default='DJF', \
 help='the season to which the proxy is sensitive')
 
 parser.add_argument('-val','--value', dest='value', default=0.6, \
+help="""the value for the proxy: can be either a float or a string, if a string, must be in
+['WB','B','N','A','WA'] and the `qualitative` flag must be set to True""")
+
+parser.add_argument('-q','--qualitative', dest='qualitative', type=bool, default=False, \
 help='the value for the proxy (can be either a float or a string)')
 
 parser.add_argument('-per','--period', dest='period', type=tuple, default=(1979, 2014), \
