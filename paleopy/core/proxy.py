@@ -297,6 +297,8 @@ class proxy:
         # if the flag qualitative is set to True (default is false)
         # then we search the years corresponding to the category
         if self.qualitative:
+            if val not in labels:
+                raise ValueError("category not in ['WB','B','N','A','WA']")
             subset = self.ts_seas[self.ts_seas['cat'] == val]
             self.category = val
         # if not, then we search in the bins
