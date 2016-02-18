@@ -141,7 +141,7 @@ process the proxy
 """
 
 if verbose:
-    save_progress(opath, 'Start', 0)
+    save_progress(opath, 'Process the proxy', 0)
 p.extract_ts()
 p.calculate_season()
 p.find_analogs()
@@ -150,7 +150,7 @@ p.proxy_repr()
 f.savefig(os.path.join(opath, 'time_series.png'))
 
 if verbose:
-    save_progress(opath, 'Process the proxy', 20)
+    save_progress(opath, 'SST', 20)
 
 """
 instantiate the analog classes with the proxy for each dataset + variable we
@@ -169,7 +169,7 @@ f = scalar_plot(sst, test=0.1, proj='cyl').plot()
 f.savefig(os.path.join(opath, 'map1_proxy.png'))
 
 if verbose:
-    save_progress(opath, 'SST', 40)
+    save_progress(opath, 'UWND at 200hpa', 40)
 
 # ==============================================================================
 """
@@ -183,7 +183,7 @@ f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 f.savefig(os.path.join(opath, 'map2_proxy.png'))
 
 if verbose:
-    save_progress(opath, 'UWND at 200hpa', 60)
+    save_progress(opath, 'UWND at 800hpa', 60)
 
 uwnd = analogs(p, 'ncep', 'uwnd_850').composite()
 
@@ -192,7 +192,7 @@ f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 f.savefig(os.path.join(opath, 'map3_proxy.png'))
 
 if verbose:
-    save_progress(opath, 'UWND at 800hpa', 80)
+    save_progress(opath, 'Climate Indices', 80)
 
 # ==============================================================================
 """
@@ -204,4 +204,4 @@ f = indices(p).plot()
 f.savefig(os.path.join(opath, 'indices_proxy.png'))
 
 if verbose:
-    save_progress(opath, 'Climate Indices', 100)
+    save_progress(opath, 'Complete', 100)
