@@ -78,6 +78,12 @@ ens = ensemble(**vargs)
 # p = proxy(sitename, lon, lat, dpath=dpath, dataset=dataset, variable=variable,
 #           season=season, value=value, period=period, climatology=climatology, calc_anoms=calc_anoms, detrend=detrend)
 
+"""
+Creates output file array
+"""
+
+images = []
+
 if verbose:
     save_progress(opath, 'SST', 0)
 """
@@ -95,6 +101,7 @@ sst = analogs(ens, 'ersst', 'sst').composite()
 f = scalar_plot(sst, test=0.1, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map_ensemble.png'))
+images.append({'id': 'SST_GL_map_ensemble', 'title' : 'SST', 'filename': 'map_ensemble.png'})
 
 if verbose:
     save_progress(opath, 'UWND at 200hpa', 20)
@@ -109,6 +116,7 @@ uwnd = analogs(ens, 'ncep', 'uwnd_200').composite()
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map2_ensemble.png'))
+images.append({'id': 'NCEP_GL_map_ensemble_200', 'title' : 'Zonal Wind at 200hPa', 'filename': 'map2_ensemble.png'})
 
 if verbose:
     save_progress(opath, 'UWND at 850hpa', 40)
@@ -118,6 +126,7 @@ uwnd = analogs(ens, 'ncep', 'uwnd_850').composite()
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map3_ensemble.png'))
+images.append({'id': 'NCEP_GL_map_ensemble_850', 'title' : 'Zonal Wind at 850hPa', 'filename': 'map3_ensemble.png'})
 
 if verbose:
     save_progress(opath, 'Climate Indices', 60)
@@ -130,6 +139,7 @@ CLIMATE INDICES
 f = indices(ens).plot()
 
 f.savefig(os.path.join(opath, 'indices_ensemble.png'))
+images.append({'id': 'indices_ensemble', 'title' : 'Climate Indices', 'filename': 'indices_ensemble.png'})
 
 if verbose:
     save_progress(opath, 'Weather Regimes', 80)
@@ -145,6 +155,12 @@ w.probs_anomalies(kind='many')
 f = w.plot_bar()
 
 f.savefig(os.path.join(opath, 'WR_ensemble.png'))
+images.append({'id': 'Ensemble_bar_plot', 'title' : 'Weather Regimes', 'filename': 'WR_ensemble.png'})
 
 if verbose:
     save_progress(opath, 'Complete', 100)
+
+
+# Save images list to json file
+with open(os.path.join(opath, 'images.json'), 'w') as f:
+    json.dump(images, f)
