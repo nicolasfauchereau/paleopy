@@ -34,7 +34,7 @@ usage: proxy_oper.py [-h] [-dj DJSONS] [-pj PJSONS] [-pn PFNAME] [-o OPATH]
                      [-q QUALITATIVE] [-per PERIOD] [-clim CLIMATOLOGY]
                      [-an CALC_ANOMS] [-dt DETREND] [-a ASPECT] [-e ELEVATION]
                      [-dc DATING_CONVENTION] [-cal CALENDAR] [-ch CHRONOLOGY]
-                     [-m MEASUREMENT]
+                     [-m MEASUREMENT] [-v True|False]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -96,6 +96,10 @@ optional arguments:
                         Dendrochronology, etc)
   -m MEASUREMENT, --measurement MEASUREMENT
                         the proxy measurement type (e.g. width for tree rings)
+  -v True|False, --verbose True|False
+                        Creates an output.json file with information about the
+                        step and the percentage of progress. If ommited, default
+                        values is False.
 ```
 
 + **ensemble_oper.py**
@@ -103,6 +107,7 @@ optional arguments:
 ```
 → ./ensemble_oper.py --help
 usage: ensemble_oper.py [-h] [-dj DJSONS] [-j PJSONS] [-o OPATH] [-s SEASON]
+                        [-v True|False]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -116,6 +121,10 @@ optional arguments:
   -s SEASON, --season SEASON
                         the season to consider: will be checked against the
                         individual proxies seasons
+  -v True|False, --verbose True|False
+                        Creates an output.json file with information about the
+                        step and the percentage of progress. If ommited, default
+                        values is False.
 ```
 
 ## Jupyter notebooks examples
