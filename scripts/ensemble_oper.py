@@ -3,6 +3,9 @@ import os
 import sys
 import argparse
 
+from collections import OrderedDict as od
+import json
+
 import matplotlib
 matplotlib.use('Agg')
 
@@ -13,6 +16,19 @@ from paleopy import ensemble
 from paleopy import WR
 from paleopy.plotting import scalar_plot
 from paleopy.plotting import indices
+
+"""
+Global function for saving progress
+"""
+
+
+def save_progress(path=None, step=None, value=0):
+    progress = od()
+    progress['step'] = step
+    progress['percentage'] = value
+    with open(os.path.join(path, 'output.json'), 'w') as f:
+        json.dump(progress, f)
+
 
 """
 parse command line arguments
@@ -32,6 +48,8 @@ help='the directory in which to save the figures')
 parser.add_argument('-s','--season', dest='season', type=str, default='DJF', \
 help='the season to consider: will be checked against the individual proxies seasons')
 
+parser.add_argument('-v', '--verbose', dest='verbose', type=bool, default=False, \
+                    help='Output progress')
 
 """
 goes from argparse Namespace to a dictionnary or key / value arguments
@@ -46,6 +64,12 @@ pop `opath` (the path where the outputs are saved) out of the dictionnary
 opath = vargs.pop('opath')
 
 """
+pop `verbose` out of the dictionnary
+"""
+verbose = vargs.pop('verbose')
+
+
+"""
 instantiates an `ensemble` class, pass the `vargs` dict of keyword arguments to the class
 """
 
@@ -54,7 +78,8 @@ ens = ensemble(**vargs)
 # p = proxy(sitename, lon, lat, dpath=dpath, dataset=dataset, variable=variable,
 #           season=season, value=value, period=period, climatology=climatology, calc_anoms=calc_anoms, detrend=detrend)
 
-
+if verbose:
+    save_progress(opath, 'SST', 0)
 """
 instantiate the analog classes with the proxy for each dataset + variable we
 want to map
@@ -71,6 +96,9 @@ f = scalar_plot(sst, test=0.1, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map_ensemble.png'))
 
+if verbose:
+    save_progress(opath, 'UWND at 200hpa', 20)
+
 # ==============================================================================
 """
 UWND at 850 and 200 hPa
@@ -82,11 +110,17 @@ f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map2_ensemble.png'))
 
+if verbose:
+    save_progress(opath, 'UWND at 850hpa', 40)
+
 uwnd = analogs(ens, 'ncep', 'uwnd_850').composite()
 
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map3_ensemble.png'))
+
+if verbose:
+    save_progress(opath, 'Climate Indices', 60)
 
 # ==============================================================================
 """
@@ -97,6 +131,8 @@ f = indices(ens).plot()
 
 f.savefig(os.path.join(opath, 'indices_ensemble.png'))
 
+if verbose:
+    save_progress(opath, 'Weather Regimes', 80)
 # ==============================================================================
 """
 WEATHER REGIMES
@@ -109,3 +145,6 @@ w.probs_anomalies(kind='many')
 f = w.plot_bar()
 
 f.savefig(os.path.join(opath, 'WR_ensemble.png'))
+
+if verbose:
+    save_progress(opath, 'Complete', 100)
