@@ -136,6 +136,13 @@ instantiates a proxy class, pass the `vargs` dict of keyword arguments to the cl
 
 p = proxy(**vargs)
 
+
+"""
+Creates output file array
+"""
+
+images = []
+
 """
 process the proxy
 """
@@ -148,6 +155,7 @@ p.find_analogs()
 f = p.plot_season_ts()
 p.proxy_repr()
 f.savefig(os.path.join(opath, 'time_series.png'))
+images.append({'id': 'time_series', 'title' : 'Analog Seasons', 'filename': 'time_series.png'})
 
 if verbose:
     save_progress(opath, 'SST', 20)
@@ -167,6 +175,7 @@ sst = analogs(p, 'ersst', 'sst').composite()
 f = scalar_plot(sst, test=0.1, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map1_proxy.png'))
+images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'map1_proxy.png'})
 
 if verbose:
     save_progress(opath, 'UWND at 200hpa', 40)
@@ -181,15 +190,17 @@ uwnd = analogs(p, 'ncep', 'uwnd_200').composite()
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map2_proxy.png'))
+images.append({'id': 'uwnd_200', 'title' : 'Zonal Wind at 200hPa', 'filename': 'map2_proxy.png'})
 
 if verbose:
-    save_progress(opath, 'UWND at 800hpa', 60)
+    save_progress(opath, 'UWND at 850hpa', 60)
 
 uwnd = analogs(p, 'ncep', 'uwnd_850').composite()
 
 f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map3_proxy.png'))
+images.append({'id': 'uwnd_850', 'title' : 'Zonal Wind at 850hPa', 'filename': 'map3_proxy.png'})
 
 if verbose:
     save_progress(opath, 'Climate Indices', 80)
@@ -202,6 +213,12 @@ CLIMATE INDICES
 f = indices(p).plot()
 
 f.savefig(os.path.join(opath, 'indices_proxy.png'))
+images.append({'id': 'indices_proxy', 'title' : 'Climate Indices', 'filename': 'indices_proxy.png'})
 
 if verbose:
     save_progress(opath, 'Complete', 100)
+
+
+# Save images list to json file
+with open(os.path.join(opath, 'images.json'), 'w') as f:
+    json.dump(images, f)
