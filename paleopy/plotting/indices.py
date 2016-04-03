@@ -23,7 +23,10 @@ class indices():
         if self.name is not None:
             data = {}
             mat = pd.read_csv(dict_json[self.name]['path'], index_col=0, parse_dates=True)
-            mat = pd.rolling_mean(mat, s_pars[0])
+            if pd.__version__ >= '0.18':
+                mat = mat.rolling(s_pars[0]).mean()
+            else:
+                mat = pd.rolling_mean(mat, s_pars[0])
             mat.dropna(inplace=True)
             mat = mat[mat.index.month == s_pars[1]]
             mat = mat.apply(zscore)
@@ -32,7 +35,10 @@ class indices():
             data = {}
             for k in dict_json.keys():
                 mat = pd.read_csv(dict_json[k]['path'], index_col=0, parse_dates=True)
-                mat = pd.rolling_mean(mat, s_pars[0])
+                if pd.__version__ >= '0.18':
+                    mat = mat.rolling(s_pars[0]).mean()
+                else:
+                    mat = pd.rolling_mean(mat, s_pars[0])
                 mat.dropna(inplace=True)
                 mat = mat[mat.index.month == s_pars[1]]
                 mat = mat.apply(zscore)
@@ -78,16 +84,11 @@ class indices():
         [l.set_fontsize(13) for l in ax.xaxis.get_ticklabels()]
         [l.set_fontsize(13) for l in ax.yaxis.get_ticklabels()]
         if pval is not None:
-            if pval <= 0.1:
-                ax.set_title("p={:4.2f}\n$\mu$={:4.2f}$\sigma$={:4.2f}".format(pval, \
-                df.mean().values[0], \
-                df.std().values[0]), \
-                fontsize=12)
-            else:
-                ax.set_title("p={:4.2f}\n$\mu$={:4.2f}\n$\sigma$={:4.2f}".format(pval, \
-                df.mean().values[0], \
-                df.std().values[0]), \
-                fontsize=12)
+            ax.set_title("p={:4.2f}\n$\mu$={:4.2f}\n$\sigma$={:4.2f}".format(pval, \
+            df.mean().values[0], \
+            df.std().values[0]), \
+            fontsize=12)
+
 
 
     def plot(self):
