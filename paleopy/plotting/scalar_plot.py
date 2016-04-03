@@ -29,7 +29,7 @@ class scalar_plot:
         self.border = border
         self.proxies_loc = proxies_loc
 
-    def get_domain(self, domain):
+    def _get_domain(self, domain):
 
         domain_dset = self.analogs.dset_dict['domain']
 
@@ -64,8 +64,9 @@ class scalar_plot:
 
         or one of the data arrays attached to
 
-        self.analogs.dset['composite_sample']
+        + self.analogs.dset['composite_sample']
         """
+
         # ravel and removes nans for calculation of intervals etc
         calc_data = np.ravel(data[np.isfinite(data)])
 
@@ -105,21 +106,20 @@ class scalar_plot:
 
         return self
 
-
-    def plot(self, subplots=False):
+    def _get_basemap(self):
         """
-        basemap plot of a scalar quantity
+        given the projection and the domain, returns
+        the dataset as well as the Basemap instance
         """
 
         if self.domain:
-            self.get_domain(self.domain)
+            self._get_domain(self.domain)
         else:
             self.dset_domain = self.analogs.dset
 
         # get the lat and lons
         latitudes = self.dset_domain['latitudes'].data
         longitudes = self.dset_domain['longitudes'].data
-
 
         if not(self.proj):
             self.proj = 'cyl'
@@ -138,18 +138,50 @@ class scalar_plot:
 
             Any sub-domain of a global domain will work fine
             """
-            m = bm(projection=self.proj,llcrnrlat=latitudes.min(),urcrnrlat=latitudes.max(),\
+            self.m = bm(projection=self.proj,llcrnrlat=latitudes.min(),urcrnrlat=latitudes.max(),\
                 llcrnrlon=longitudes.min(),urcrnrlon=longitudes.max(),\
                 lat_ts=0, resolution=self.res)
 
         if self.proj == 'moll':
-            m = bm(projection='moll',lon_0=180, resolution=self.res)
+            self.m = bm(projection='moll',lon_0=180, resolution=self.res)
 
         if self.proj in ['npstere','spstere']:
-            m = bm(projection=self.proj,boundinglat=0,lon_0=0, resolution=self.res, round=True)
+            self.m = bm(projection=self.proj,boundinglat=0,lon_0=0, resolution=self.res, round=True)
 
-        # meshgrid lon and lat for plotting with basemap
-        lons, lats = np.meshgrid(longitudes, latitudes)
+        return self
+
+    def _meshgrid(self, data_array):
+        """
+        given some data, returns the np.meshgrid associated
+        lons and lats + addcyclic longitude if proj is 'spstere'
+        or 'npstere'
+        """
+
+        latitudes = self.dset_domain['latitudes'].data
+        longitudes = self.dset_domain['longitudes'].data
+
+        if self.proj in ['npstere','spstere']:
+            """
+            if north polar or south polar stereographic projection
+            we take care of the discontinuity at Greenwich using the
+            `addcyclic` function of basemap
+            """
+            data_array, lon = addcyclic(data_array, longitudes)
+            lons, lats = np.meshgrid(lon, latitudes)
+        else:
+            lons, lats = np.meshgrid(longitudes, latitudes)
+
+        return lons, lats, data_array
+
+
+    def plot(self, subplots=False):
+        """
+        basemap plot of a scalar quantity
+        """
+
+        # get the basemap instance
+
+        self._get_basemap()
 
         # ===============================================================
         # plots
@@ -187,51 +219,44 @@ class scalar_plot:
                 ax = axes[i]
 
                 matp = mat[i,:,:]
-                if self.proj in ['npstere','spstere']:
-                    """
-                    if north polar or south polar stereographic projection
-                    we take care of the discontinuity at Greenwich
-                    """
-                    matp, lon = addcyclic(matp, longitudes)
-                    lons, lats = np.meshgrid(lon, latitudes)
-                else:
-                    lons, lats = np.meshgrid(longitudes, latitudes)
 
-                m.ax = ax
+                lons, lats, matp = self._meshgrid(matp)
+
+                self.m.ax = ax
 
                 # pcolormesh
-                im = m.pcolormesh(lons, lats, ma.masked_invalid(matp), \
+                im = self.m.pcolormesh(lons, lats, ma.masked_invalid(matp), \
                                   vmin=self.vmin, vmax=self.vmax, cmap=self.cmap, latlon=True)
 
                 # sets the colorbar
-                cb = m.colorbar(im)
+                cb = self.m.colorbar(im)
                 [l.set_fontsize(10) for l in cb.ax.yaxis.get_ticklabels()]
                 cb.set_label(self.analogs.dset_dict['units'],fontsize=10)
 
                 # draw the coastlines
-                m.drawcoastlines()
+                self.m.drawcoastlines()
 
                 # if one is plotting SST data, fill the continents
                 if self.analogs.variable in ['sst','SST']:
-                    m.fillcontinents('0.8', lake_color='0.8')
+                    self.m.fillcontinents('0.8', lake_color='0.8')
 
                 # if grid, plots the lat  / lon lines on the map
                 if self.grid:
                     # if it's hires ('f' or 'h'), every 10 degrees
                     if self.res in ['h','f']:
-                        m.drawmeridians(np.arange(0, 360, 5), labels=[0,0,0,1], fontsize=10)
-                        m.drawparallels(np.arange(-80, 80+5, 5), labels=[1,0,0,0], fontsize=10)
+                        self.m.drawmeridians(np.arange(0, 360, 5), labels=[0,0,0,1], fontsize=10)
+                        self.m.drawparallels(np.arange(-80, 80+5, 5), labels=[1,0,0,0], fontsize=10)
                     # if not hires, plots lines every 40 degrees
                     else:
-                        m.drawmeridians(np.arange(0, 360, 60), labels=[0,0,0,1], fontsize=10)
-                        m.drawparallels(np.arange(-80, 80+10, 40), labels=[1,0,0,0], fontsize=10)
+                        self.m.drawmeridians(np.arange(0, 360, 60), labels=[0,0,0,1], fontsize=10)
+                        self.m.drawparallels(np.arange(-80, 80+10, 40), labels=[1,0,0,0], fontsize=10)
 
                 if not(self.border):
                     ax.axis('off')
 
                 # set the title from the description in the dataset + variable JSON entry
-                ax.set_title("{}: {}".format(self.analogs.dset_dict['short_description'],\
-                self.analogs.analog_years[i]), \
+                ax.set_title("{}: {} {}".format(self.analogs.dset_dict['short_description'],\
+                self.analogs.season, self.analogs.analog_years[i]), \
                 fontsize=10)
 
                 # proxies_loc is True, we plot the proxies locations on the map
@@ -241,7 +266,7 @@ class scalar_plot:
                         lon, lat = locs[k]
                         if (lon > 180):
                             lon -= 360.
-                        m.plot(lon, lat, marker='D', color='m', markersize=8, latlon=True)
+                        self.m.plot(lon, lat, marker='D', color='m', markersize=8, latlon=True)
 
             # if not even number of years, we delete the last
             # (empty) subplpot that was created
@@ -268,26 +293,18 @@ class scalar_plot:
 
             pvalues = self.dset_domain['pvalues'].data
 
-            if self.proj in ['npstere','spstere']:
-                """
-                if north polar or south polar stereographic projection
-                we take care of the discontinuity at Greenwich
-                """
-                mat, lon = addcyclic(mat, longitudes)
-                pvalues, lon = addcyclic(pvalues, longitudes)
-                lons, lats = np.meshgrid(lon, latitudes)
-            else:
-                lons, lats = np.meshgrid(longitudes, latitudes)
+            lons, lats, mat = self._meshgrid(mat)
+            lons, lats, pvalues = self._meshgrid(pvalues)
 
             r, c = mat.shape
 
             f, ax = plt.subplots(figsize=(8*(c/r), 8), dpi=200)
 
             # the basemap instance gets attached to the created axes
-            m.ax = ax
+            self.m.ax = ax
 
             # pcolormesh
-            im = m.pcolormesh(lons, lats, ma.masked_invalid(mat), \
+            im = self.m.pcolormesh(lons, lats, ma.masked_invalid(mat), \
                               vmin=self.vmin, vmax=self.vmax, cmap=self.cmap, latlon=True)
 
             # if test is defined, one contours the p-values for that level
@@ -295,31 +312,31 @@ class scalar_plot:
                 #P = ma.where(self.dset['pvalues'].data <0.1 , 1, np.nan)
                 #m.contourf(lon, lat, P, colors='0.99', \
                 #           hatches=['...'], latlon=True, zorder=2, alpha=0.2)
-                m.contour(lons, lats, pvalues, [self.test], latlon=True, \
+                self.m.contour(lons, lats, pvalues, [self.test], latlon=True, \
                           colors='#8C001A', linewidths=1.5)
 
             # sets the colorbar
-            cb = m.colorbar(im)
+            cb = self.m.colorbar(im)
             [l.set_fontsize(14) for l in cb.ax.yaxis.get_ticklabels()]
             cb.set_label(self.analogs.dset_dict['units'],fontsize=14)
 
             # draw the coastlines
-            m.drawcoastlines()
+            self.m.drawcoastlines()
 
             # if one is plotting SST data, fill the continents
             if self.analogs.variable in ['sst','SST']:
-                m.fillcontinents('0.8', lake_color='0.8')
+                self.m.fillcontinents('0.8', lake_color='0.8')
 
             # if grid, plots the lat  / lon lines on the map
             if self.grid:
                 # if it's hires ('f' or 'h'), every 10 degrees
                 if self.res in ['h','f']:
-                    m.drawmeridians(np.arange(0, 360, 5), labels=[0,0,0,1], fontsize=14)
-                    m.drawparallels(np.arange(-80, 80+5, 5), labels=[1,0,0,0], fontsize=14)
+                    self.m.drawmeridians(np.arange(0, 360, 5), labels=[0,0,0,1], fontsize=14)
+                    self.m.drawparallels(np.arange(-80, 80+5, 5), labels=[1,0,0,0], fontsize=14)
                 # if not hires, plots lines every 40 degrees
                 else:
-                    m.drawmeridians(np.arange(0, 360, 60), labels=[0,0,0,1], fontsize=14)
-                    m.drawparallels(np.arange(-80, 80+10, 40), labels=[1,0,0,0], fontsize=14)
+                    self.m.drawmeridians(np.arange(0, 360, 60), labels=[0,0,0,1], fontsize=14)
+                    self.m.drawparallels(np.arange(-80, 80+10, 40), labels=[1,0,0,0], fontsize=14)
 
             if not(self.border):
                 ax.axis('off')
@@ -334,7 +351,7 @@ class scalar_plot:
                     lon, lat = locs[k]
                     if (lon > 180):
                         lon -= 360.
-                    m.plot(lon, lat, marker='D', color='m', markersize=8, latlon=True)
+                    self.m.plot(lon, lat, marker='D', color='m', markersize=8, latlon=True)
 
             return f
 

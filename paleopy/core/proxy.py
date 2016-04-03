@@ -394,10 +394,10 @@ class proxy:
             else:
                 ya = self.analogs.loc[self.variable]
 
-        ax.plot(y.index, y.values, 'steelblue', lw=2, label='ts')
-        ax.plot(yd.index, yd.values, color='k', lw=2, label='ts (detrended)')
+        ax.plot(y.index, y.values, 'steelblue', lw=2, label='{}'.format(self.variable))
+        ax.plot(yd.index, yd.values, color='k', lw=2, label='{} (detrended)'.format(self.variable))
         ax.plot(ya.index, ya.values, 'ro', label='analog years')
-        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.4, label="")
+        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.3, label="")
 
         ax.set_xlim(y.index[0] - relativedelta(years=1), y.index[-1] + relativedelta(years=1))
 
@@ -407,6 +407,10 @@ class proxy:
         ax.legend(framealpha=0.4, loc='best')
 
         [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
+
+        # add a zero line if we deal with anomalies
+        if self.calc_anoms:
+            ax.axhline(0, color='k', linewidth=0.5)
 
         ax.grid()
 
