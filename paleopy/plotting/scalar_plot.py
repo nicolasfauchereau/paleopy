@@ -160,7 +160,7 @@ class scalar_plot:
         latitudes = self.dset_domain['latitudes'].data
         longitudes = self.dset_domain['longitudes'].data
 
-        if self.proj in ['npstere','spstere']:
+        if self.proj in ['npstere','spstere','moll']:
             """
             if north polar or south polar stereographic projection
             we take care of the discontinuity at Greenwich using the
