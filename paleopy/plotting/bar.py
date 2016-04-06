@@ -1,4 +1,4 @@
-def bar(wr):
+def bar(wr, sig):
     """
     """
 
@@ -58,8 +58,9 @@ def bar(wr):
         wrone = copy(wr)
 
         wrone.probs_anomalies(kind='one')
-        testb = (wrone.df_probs['ensemble'] < wrone.df_probs["10"]) \
-        | (wrone.df_probs['ensemble'] > wrone.df_probs["90"]).values
+
+        testb = (wrone.df_probs['ensemble'] < wrone.df_probs["{}".format(sig)]) \
+        | (wrone.df_probs['ensemble'] > wrone.df_probs["{}".format((100-sig))]).values
 
         for i,b in enumerate(bp['boxes']):
             if wrone.df_anoms.iloc[i,:].values >= 0:
@@ -84,22 +85,65 @@ def bar(wr):
 
     # if the object passed is NOT an ensemble, but a proxy object
     else:
+        # get the anomalies
         if not(hasattr(wr, 'df_anoms')):
             wr.probs_anomalies(kind='one')
 
         df_anoms = wr.df_anoms * 100
 
-        testb = (wr.df_probs[wr.parent.sitename] < wr.df_probs["10"]) \
-            | (wr.df_probs[wr.parent.sitename] > wr.df_probs["90"]).values
+        testb = (wr.df_probs[wr.parent.sitename] < wr.df_probs["{}".format(sig)]) \
+            | (wr.df_probs[wr.parent.sitename] > wr.df_probs["{}".format((100-sig))]).values
 
         # first subplot, climatological frequencies
 
-        fig, axes = plt.subplots(nrows=2,ncols=1)
+        fig, axes = plt.subplots(nrows=2,ncols=1, figsize=(5,9), sharex=True)
         axes = axes.flatten()
+        fig.subplots_adjust(hspace=0)
 
+        """
+        first axes: climatological frequencies
+        """
         ax1 = axes[0]
 
         ax1.bar(np.arange(0.5, len(clim_probs)+0.5), clim_probs * 100, color="0.8", width=1., alpha=0.8)
-        ax1.set_ylabel("climatological frequency %", fontsize=14)
+
+        ax1.set_ylabel("climatological frequency (%)", fontsize=14)
+
+        [l.set_fontsize(13) for l in ax1.yaxis.get_ticklabels()]
+
+        ax1.set_title("{} Weather Regimes".format(wr.classification), fontsize=14)
+
+        """
+        second axes: anomalies
+        """
+        ax2 = axes[1]
+
+        # loop over the dataframe containing the anomalies, checks the
+        # test, and plot ...
+        for i in range(len(df_anoms.index)):
+            if df_anoms.iloc[i,:].values >= 0:
+                if testb.iloc[i]:
+                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='r',width=1., alpha=1.)
+                else:
+                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='r',width=1., alpha=.5)
+            else:
+                if testb.iloc[i]:
+                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='b',width=1., alpha=1.)
+                else:
+                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='b',width=1., alpha=.5)
+
+        # move the ticks and labels to the right
+        ax2.yaxis.tick_right()
+        ax2.yaxis.set_label_position("right")
+
+        ax2.set_xticks(range(1, len(df_anoms.index)+1))
+        ax2.set_xticklabels(df_anoms.index.tolist())
+        ax2.set_xlim(0.5, len(df_anoms.index) + 0.5)
+
+        ax2.set_ylabel("change in frequency (%)", fontsize=14)
+
+        [l.set_fontsize(13) for l in ax1.yaxis.get_ticklabels()]
+
+        [l.set_fontsize(14) for l in ax2.xaxis.get_ticklabels()]
 
     return fig
