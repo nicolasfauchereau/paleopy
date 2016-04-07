@@ -91,12 +91,14 @@ def bar(wr, sig):
 
         df_anoms = wr.df_anoms * 100
 
+        nregimes = len(df_anoms)
+
         testb = (wr.df_probs[wr.parent.sitename] < wr.df_probs["{}".format(sig)]) \
             | (wr.df_probs[wr.parent.sitename] > wr.df_probs["{}".format((100-sig))]).values
 
         # first subplot, climatological frequencies
 
-        fig, axes = plt.subplots(nrows=2,ncols=1, figsize=(5,9), sharex=True)
+        fig, axes = plt.subplots(nrows=2,ncols=1, figsize=(nregimes*0.8,9), sharex=True)
         axes = axes.flatten()
         fig.subplots_adjust(hspace=0)
 
@@ -105,13 +107,19 @@ def bar(wr, sig):
         """
         ax1 = axes[0]
 
-        ax1.bar(np.arange(0.5, len(clim_probs)+0.5), clim_probs * 100, color="0.8", width=1., alpha=0.8)
+        ax1.bar(np.arange(0.5, nregimes+0.5), clim_probs * 100, color="0.8", width=1., alpha=0.8)
 
         ax1.set_ylabel("climatological frequency (%)", fontsize=14)
 
         [l.set_fontsize(13) for l in ax1.yaxis.get_ticklabels()]
 
         ax1.set_title("{} Weather Regimes".format(wr.classification), fontsize=14)
+
+        ax1.yaxis.grid(True)
+        ax1.set_axisbelow(True)
+
+        [ax1.axvline(l, color='k', linestyle=':', zorder=-1) for l in np.arange(1.5, nregimes)]
+
 
         """
         second axes: anomalies
@@ -120,30 +128,37 @@ def bar(wr, sig):
 
         # loop over the dataframe containing the anomalies, checks the
         # test, and plot ...
-        for i in range(len(df_anoms.index)):
+        for i in range(nregimes):
             if df_anoms.iloc[i,:].values >= 0:
                 if testb.iloc[i]:
                     ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='r',width=1., alpha=1.)
                 else:
-                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='r',width=1., alpha=.5)
+                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='coral',width=1., alpha=.3)
             else:
                 if testb.iloc[i]:
                     ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='b',width=1., alpha=1.)
                 else:
-                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='b',width=1., alpha=.5)
+                    ax2.bar(i+0.5, df_anoms.iloc[i,:].values, color='steelblue',width=1., alpha=.3)
 
         # move the ticks and labels to the right
         ax2.yaxis.tick_right()
         ax2.yaxis.set_label_position("right")
 
-        ax2.set_xticks(range(1, len(df_anoms.index)+1))
+        ax2.set_xticks(range(1, nregimes+1))
         ax2.set_xticklabels(df_anoms.index.tolist())
-        ax2.set_xlim(0.5, len(df_anoms.index) + 0.5)
+        ax2.set_xlim(0.5, nregimes + 0.5)
 
         ax2.set_ylabel("change in frequency (%)", fontsize=14)
 
-        [l.set_fontsize(13) for l in ax1.yaxis.get_ticklabels()]
+        ax2.set_xlabel("weather regime", fontsize=14)
+
+        [l.set_fontsize(13) for l in ax2.yaxis.get_ticklabels()]
 
         [l.set_fontsize(14) for l in ax2.xaxis.get_ticklabels()]
+
+        ax2.yaxis.grid(True)
+        ax2.set_axisbelow(True)
+
+        [ax2.axvline(l, color='k', linestyle=':', zorder=-1) for l in np.arange(1.5, nregimes)]
 
     return fig
