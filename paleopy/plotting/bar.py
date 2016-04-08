@@ -64,12 +64,12 @@ def bar(wr, sig):
 
         for i,b in enumerate(bp['boxes']):
             if wrone.df_anoms.iloc[i,:].values >= 0:
-                plt.setp(b,facecolor='r', edgecolor='r', alpha=0.5)
+                plt.setp(b,facecolor='coral', edgecolor='coral', alpha=0.5)
                 plt.plot(i+1,wrone.df_anoms.iloc[i,:]*100, 'r*')
                 if testb[i]:
                     plt.setp(b,facecolor='r', edgecolor='r', alpha=0.9)
             else:
-                plt.setp(b,facecolor='b', edgecolor='b', alpha=0.5)
+                plt.setp(b,facecolor='steelblue', edgecolor='steelblue', alpha=0.5)
                 plt.plot(i+1,wrone.df_anoms.iloc[i,:]*100, 'b*')
                 if testb[i]:
                     plt.setp(b,facecolor='b', edgecolor='b', alpha=0.9)
