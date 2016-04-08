@@ -199,6 +199,6 @@ class WR:
         f = heatmap(self)
         return f
 
-    def plot_bar(self):
-        f = bar(self)
+    def plot_bar(self, sig=10):
+        f = bar(self, sig)
         return f

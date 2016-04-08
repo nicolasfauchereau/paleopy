@@ -256,6 +256,8 @@ class proxy:
             self.ts = pd.DataFrame(ts.loc[:,self.variable])
         dset.close()
 
+        return self
+
     def calculate_season(self):
         """
         calculates the seasonal values, can be either raw
@@ -269,6 +271,9 @@ class proxy:
         # key = the season string ('DJF', 'JJA')
         # value =  a tuple (length of the season, month of the end of the season)
         self.seasons_params = seasons_params()
+
+        if not(hasattr(self, 'ts')):
+            self.extract_ts()
 
         # if the variable is rainfall, we calculate rolling sum
         if self.dset_dict['units'] in ['mm']:
@@ -314,6 +319,8 @@ class proxy:
 
         self.ts_seas = ts_seas
 
+        return self
+
     def find_analogs(self):
         """
         find the analog seasons
@@ -324,6 +331,10 @@ class proxy:
         self.analog_years : a list with the analog years
         self.quintiles : the bins for the quintiles used
         """
+
+        if not(hasattr(self, 'ts_seas')):
+             self.calculate_season()
+
         val = self.value
         if self.calc_anoms and not self.detrend:
             ts = self.ts_seas.loc[:,'anomalies']
