@@ -7,13 +7,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from dateutil.relativedelta import relativedelta
 import json
-import xray
+
+try:
+    import xarray as xray
+except:
+    try:
+        import xray
+    except ImportError:
+        print('cannot import xarray or xray')
+
 from scipy.stats import linregress
 
 # relative imports
-from ..utils.do_kdtree import do_kdtree
-from ..utils.haversine import haversine
-from ..utils.pprint_od import pprint_od
+from ..utils import do_kdtree
+from ..utils import haversine
+from ..utils import pprint_od
 from ..utils import seasons_params
 
 import warnings
@@ -170,11 +178,20 @@ class proxy:
         self.detrend = detrend
 
     def read_dset_params(self):
+        """
+        reads the `datasets.json` file and loads the dictionnary
+        containing all the parameters for this dataset
+        """
         with open(os.path.join(self.djsons, 'datasets.json'), 'r') as f:
             dset_dict = json.loads(f.read())
         self.dset_dict = dset_dict[self.dataset][self.variable]
 
     def check_domain(self):
+        """
+        checks if the domain that is passed
+        is compatible with the domain of the
+        dataset
+        """
         if not(hasattr(self, 'dset_dict')):
             self.read_dset_params()
         domain = self.dset_dict['domain']
@@ -193,6 +210,10 @@ class proxy:
             raise Exception("DOMAIN ERROR")
 
     def extract_ts(self):
+        """
+        extract the time-series for the closest grid-point to
+        the passed proxy coordinates
+        """
         # checks the domain first
         self.check_domain()
         # if all good, we proceed
@@ -235,7 +256,14 @@ class proxy:
             self.ts = pd.DataFrame(ts.loc[:,self.variable])
         dset.close()
 
+        return self
+
     def calculate_season(self):
+        """
+        calculates the seasonal values, can be either raw
+        or anomalies depending on the parameter (boolean) `calc_anoms`
+        passed when instantiating the `proxy` class
+        """
         season = self.season
         start_clim = str(self.climatology[0])
         end_clim = str(self.climatology[1])
@@ -244,12 +272,22 @@ class proxy:
         # value =  a tuple (length of the season, month of the end of the season)
         self.seasons_params = seasons_params()
 
+        if not(hasattr(self, 'ts')):
+            self.extract_ts()
+
         # if the variable is rainfall, we calculate rolling sum
         if self.dset_dict['units'] in ['mm']:
-            ts_seas = pd.rolling_sum(self.ts, self.seasons_params[season][0])
+            # test which version of pandas we are using
+            if pd.__version__ >= '0.18':
+                ts_seas = self.ts.rolling(window=self.seasons_params[season][0]).sum()
+            else:
+                ts_seas = pd.rolling_sum(self.ts, self.seasons_params[season][0])
         # else we calculate the rolling mean (average)
         else:
-            ts_seas = pd.rolling_mean(self.ts, self.seasons_params[season][0])
+            if pd.__version__ >= '0.18':
+                ts_seas = self.ts.rolling(window=self.seasons_params[season][0]).mean()
+            else:
+                ts_seas = pd.rolling_mean(self.ts, self.seasons_params[season][0])
 
         ts_seas = ts_seas[ts_seas.index.month == self.seasons_params[season][1]]
 
@@ -281,7 +319,22 @@ class proxy:
 
         self.ts_seas = ts_seas
 
+        return self
+
     def find_analogs(self):
+        """
+        find the analog seasons
+
+        return:
+
+        self.analogs : a pandas DataFrame
+        self.analog_years : a list with the analog years
+        self.quintiles : the bins for the quintiles used
+        """
+
+        if not(hasattr(self, 'ts_seas')):
+             self.calculate_season()
+
         val = self.value
         if self.calc_anoms and not self.detrend:
             ts = self.ts_seas.loc[:,'anomalies']
@@ -366,6 +419,9 @@ class proxy:
         self.proxy_dict = proxy_dict
 
     def plot_season_ts(self, fname=None):
+        r"""
+        should move to the `plotting` submodule
+        """
 
         f, ax = plt.subplots(figsize=(8,5))
 
@@ -394,10 +450,10 @@ class proxy:
             else:
                 ya = self.analogs.loc[self.variable]
 
-        ax.plot(y.index, y.values, 'steelblue', lw=2, label='ts')
-        ax.plot(yd.index, yd.values, color='k', lw=2, label='ts (detrended)')
+        ax.plot(y.index, y.values, 'steelblue', lw=2, label='{}'.format(self.variable))
+        ax.plot(yd.index, yd.values, color='k', lw=2, label='{} (detrended)'.format(self.variable))
         ax.plot(ya.index, ya.values, 'ro', label='analog years')
-        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.4, label="")
+        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.3, label="")
 
         ax.set_xlim(y.index[0] - relativedelta(years=1), y.index[-1] + relativedelta(years=1))
 
@@ -407,6 +463,10 @@ class proxy:
         ax.legend(framealpha=0.4, loc='best')
 
         [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
+
+        # add a zero line if we deal with anomalies
+        if self.calc_anoms:
+            ax.axhline(0, color='k', linewidth=0.5)
 
         ax.grid()
 
