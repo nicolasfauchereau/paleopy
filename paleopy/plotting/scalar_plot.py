@@ -239,6 +239,8 @@ class scalar_plot:
                 # if one is plotting SST data, fill the continents
                 if self.analogs.variable in ['sst','SST']:
                     self.m.fillcontinents('0.8', lake_color='0.8')
+                if self.analogs.dataset in ['VCSN', 'vcsn']:
+                    self.m.drawmapboundary(fill_color='steelblue')
 
                 # if grid, plots the lat  / lon lines on the map
                 if self.grid:
@@ -326,6 +328,9 @@ class scalar_plot:
             # if one is plotting SST data, fill the continents
             if self.analogs.variable in ['sst','SST']:
                 self.m.fillcontinents('0.8', lake_color='0.8')
+            # if self.analogs.dataset in ['VCSN', 'vcsn']:
+            #     self.m.drawmapboundary(fill_color='steelblue')
+
 
             # if grid, plots the lat  / lon lines on the map
             if self.grid:
