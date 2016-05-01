@@ -51,6 +51,7 @@ class ensemble:
 
         lfiles = glob(os.path.join(self.pjsons, "*.json"))
         self.analog_years = []
+        self.weights = []
         self.detrend = []
         seasons = []
         climatologies = []
@@ -59,7 +60,8 @@ class ensemble:
         for json_file in lfiles:
             with open(json_file, 'r') as f:
                 d = json.loads(f.read())
-                self.analog_years = self.analog_years + d['analog_years']
+                self.analog_years.extend(d['analog_years'])
+                self.weights.extend(d['weights'])
                 self.detrend.append(d['detrend'])
                 seasons.append(d['season'])
                 climatologies.append(d['climatology'])

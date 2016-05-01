@@ -76,6 +76,6 @@ def heatmap(wr):
     cb.set_label('% change in frequency', fontsize=14)
     [l.set_fontsize(12) for l in cb.ax.yaxis.get_ticklabels()]
 
-    ax.set_title(classification, fontsize=14)
+    ax.set_title("{} Weather Regimes".format(classification), fontsize=14)
 
     return fig
