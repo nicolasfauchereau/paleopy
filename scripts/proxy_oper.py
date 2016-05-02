@@ -1,10 +1,12 @@
-#!/Users/nicolasf/anaconda25/anaconda/bin/python
+#!/Users/nicolasf/anaconda/anaconda/bin/python
 import os
 import sys
 import argparse
 
 import matplotlib
 matplotlib.use('Agg')
+
+from matplotlib import pyplot as plt
 
 sys.path.insert(0, '../')
 
@@ -42,7 +44,7 @@ help='the path where to save the figures, tables and csv files')
 parser.add_argument('-n','--name', dest='sitename', type=str, default='Rarotonga', \
 help='the name of the site')
 
-parser.add_argument('-t','--type', dest='proxy_type', type=str, default='Coral core', \
+parser.add_argument('-t','--ptype', dest='proxy_type', type=str, default='Coral core', \
 help='the type of proxy (coral, Tree-ring, etc)')
 
 parser.add_argument('-lon','--longitude', dest='lon', type=float, default=-159.82, \
@@ -147,6 +149,8 @@ f.savefig(os.path.join(opath, 'time_series.png'))
 
 images.append({'id': 'time_series', 'title' : 'Analog Seasons', 'filename': 'time_series.png'})
 
+plt.close(f)
+
 # 3: save the proxy in the JSON file
 p.proxy_repr()
 
@@ -166,13 +170,17 @@ if p.dataset == 'vcsn':
         f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h').plot(subplots=False)
         f.savefig(os.path.join(opath,'VCSN_rain_proxy.png'))
         images.append({'id': 'vcsn_rain', 'title' : 'VCSN seasonal rainfall', 'filename': 'vcsn_rain_proxy.png'})
+        plt.close(f)
+
     if p.variable == 'TMean':
         vcsn = analogs(p, 'vcsn', 'TMean').composite()
         f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h').plot(subplots=False)
         f.savefig(os.path.join(opath,'VCSN_tmean_proxy.png'))
         images.append({'id': 'vcsn_tmean', 'title' : 'VCSN seasonal Temperatures', 'filename': 'vcsn_tmean_proxy.png'})
+        plt.close(f)
 
-        
+
+
 # ==============================================================================
 """
 Sea Surface Temperatures, global
@@ -186,6 +194,9 @@ f.savefig(os.path.join(opath,'SST_proxy.png'))
 
 images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'SST_proxy.png'})
 
+plt.close(f)
+
+
 """
 HGT at 850 hPa, global
 """
@@ -198,8 +209,7 @@ f.savefig(os.path.join(opath,'hgt_850_proxy.png'))
 
 images.append({'id': 'hgt_850', 'title' : 'Geopotential at 850 hPa', 'filename': 'HGT_850_proxy.png'})
 
-
-
+plt.close(f)
 
 if verbose:
     save_progress(opath, 'Climate Indices', 80)
@@ -214,6 +224,8 @@ f = indices(p).plot()
 f.savefig(os.path.join(opath, 'indices_proxy.png'))
 
 images.append({'id': 'indices_proxy', 'title' : 'Climate Indices', 'filename': 'indices_proxy.png'})
+
+plt.close(f)
 
 if verbose:
     save_progress(opath, 'Complete', 100)

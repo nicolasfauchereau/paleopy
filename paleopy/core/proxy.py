@@ -154,8 +154,13 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, qualitative=False, \
-                 period="1979-2014", climatology="1981-2010", calc_anoms=True, detrend=True, method='quintiles'):
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, \
+    aspect=None, elevation=None, dating_convention=None, calendar=None, \
+    chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', \
+    pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, \
+    qualitative=False, period="1979-2014", climatology="1981-2010", \
+    calc_anoms=True, detrend=True, method='quintiles'):
+
         super(proxy, self).__init__()
         if lon < 0:
             lon += 360.
@@ -374,10 +379,15 @@ class proxy:
         # if the flag qualitative is set to True (default is false)
         # then we search the years corresponding to the category
         if self.qualitative:
+            self.value = str(self.value)
             if self.value not in labels:
                 raise ValueError("category not in ['WB','B','N','A','WA']")
-            self.analogs = self.ts_seas[self.ts_seas['cat'] == self.value]
-            self.category = self.value
+            else:
+                tmp_df = self.ts_seas[self.ts_seas['cat'] == self.value].copy(deep=True)
+                tmp_df.loc[:,'weights'] = 1. / len(tmp_df)
+                self.analogs = tmp_df
+                self.weights = self.analogs.loc[:,'weights'].values
+                self.category = self.value
         # if value is quantitative we use the method ("quintiles" or "closest eight")
         else:
             if self.method == 'quintiles':
@@ -404,9 +414,8 @@ class proxy:
                 # calculates the weights (add to 1)
                 self.analogs = self._calc_weights(tmp_df)
                 self.category = self.analogs.loc[:,'cat'].values
-
+            self.weights = self.analogs.loc[:,'weights'].values
         self.analog_years = self.analogs.index.year
-        self.weights = self.analogs.loc[:,'weights'].values
 
     def proxy_repr(self, pprint=False, outfile=True):
         """
@@ -438,10 +447,13 @@ class proxy:
         proxy_dict['extracted_coords'] = self.extracted_coords.tolist()
         proxy_dict['distance_point'] = self.distance_point
         proxy_dict['trend_params'] = self.trend_params
-        if self.method == 'quintiles':
+        if self.qualitative:
             proxy_dict['category'] = self.category
-        elif self.method == 'closest 8':
-            proxy_dict['category'] = ",".join(list(self.category))
+        else:
+            if self.method == 'quintiles':
+                proxy_dict['category'] = self.category
+            elif self.method == 'closest 8':
+                proxy_dict['category'] = ",".join(list(self.category))
         proxy_dict['analog_years'] = self.analog_years.tolist()
         proxy_dict['weights'] = list(self.weights)
 
@@ -467,7 +479,6 @@ class proxy:
     def to_html(filename):
         if not(hasattr(self, 'analogs')):
             self.find_analogs()
-
 
     def plot_season_ts(self, fname=None):
         r"""
