@@ -515,7 +515,7 @@ class proxy:
 
         ax.legend(framealpha=0.4, loc='best')
 
-        if self.method == 'quintiles':
+        if not self.qualitative and self.method == 'quintiles':
             [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
 
         # add a zero line if we deal with anomalies

@@ -2,8 +2,6 @@
 import os
 import sys
 import argparse
-
-from collections import OrderedDict as od
 import json
 
 import matplotlib
@@ -18,6 +16,8 @@ from paleopy import analogs
 from paleopy.plotting import scalar_plot
 from paleopy.plotting import indices
 from paleopy.utils import save_progress
+from paleopy import WR
+
 
 """
 import the little progress file indicator, really
@@ -69,8 +69,8 @@ parser.add_argument('-val','--value', dest='value', default=0.6, \
 help="""the value for the proxy: can be either a float or a string, if a string, must be in
 ['WB','B','N','A','WA'] and the `qualitative` flag must be set to True""")
 
-parser.add_argument('-q','--qualitative', dest='qualitative', type=bool, default=False, \
-help='a flag indicating whether the value passed (see above) is qualitative or not, default to False: \
+parser.add_argument('-q','--qualitative', dest='qualitative', type=int, default=0, \
+help='a flag indicating whether the value passed (see above) is qualitative or not, default to 0 (False): \
 i.e. interpret the value as a float')
 
 parser.add_argument('-per','--period', dest='period', type=str, default="1979-2014", \
@@ -79,11 +79,11 @@ help='the period from which to draw the analog seasons')
 parser.add_argument('-clim','--climatology', dest='climatology', type=str, default="1981-2010", \
 help='the climatological period with respect to which the anomalies are calculated')
 
-parser.add_argument('-an','--calc_anoms', dest='calc_anoms', type=bool, default=True, \
-help='True if the anomalies are calculated, False otherwise. Default is True')
+parser.add_argument('-an','--calc_anoms', dest='calc_anoms', type=int, default=1, \
+help='True if the anomalies are calculated, False otherwise. Default is 1 (True)')
 
-parser.add_argument('-dt','--detrend', dest='detrend', type=bool, default=True, \
-help='True if the time-series need detrended, False otherwise. Default is True')
+parser.add_argument('-dt','--detrend', dest='detrend', type=int, default=1, \
+help='True if the time-series need detrended, False otherwise. Default is 1 (True)')
 
 parser.add_argument('-a','--aspect', dest='aspect', type=float, default=None, \
 help='the aspect (in degrees, from 0 to 360)')
@@ -103,7 +103,7 @@ help='the chronology control (i.e. 14C, Historic, Dendrochronology, etc)')
 parser.add_argument('-m','--measurement', dest='measurement', type=str, default=None, \
 help='the proxy measurement type (e.g. width for tree rings)')
 
-parser.add_argument('-v', '--verbose', dest='verbose', type=bool, default=False,
+parser.add_argument('-v', '--verbose', dest='verbose', type=int, default=0,
 help='Output progress')
 
 """
@@ -122,7 +122,7 @@ opath = vargs.pop('opath')
 pop `verbose` out of the dictionnary
 """
 
-verbose = vargs.pop('verbose')
+verbose = bool(vargs.pop('verbose'))
 
 
 """
@@ -130,6 +130,10 @@ instantiates a proxy class, pass the `vargs` dict of keyword arguments to the cl
 """
 
 p = proxy(**vargs)
+
+"""
+process the proxy
+"""
 
 """
 initialise output file list
@@ -184,7 +188,6 @@ if p.dataset == 'vcsn':
         f.savefig(os.path.join(opath,'VCSN_tmean_proxy.png'))
         images.append({'id': 'vcsn_tmean', 'title' : 'VCSN seasonal Temperatures', 'filename': 'vcsn_tmean_proxy.png'})
         plt.close(f)
-
 
 
 # ==============================================================================
@@ -246,7 +249,54 @@ images.append({'id': 'uwnd_850', 'title' : 'Zonal Wind at 850hPa', 'filename': '
 
 
 if verbose:
-    save_progress(opath, 'Climate Indices', 80)
+    save_progress(opath, 'HGT 850 global', 20)
+
+"""
+HGT at 1000 hPa, global
+"""
+
+hgt = analogs(p, 'ncep', 'hgt_1000').composite()
+
+f = scalar_plot(hgt, test=0.05, proj='cyl').plot()
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy.png'))
+
+images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'HGT_1000_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'HGT 1000 global', 30)
+
+"""
+HGT at 1000 hPa, NZ domain, composite
+"""
+
+f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h').plot(subplots=False)
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ.png'))
+
+images.append({'id': 'hgt_1000_NZ', 'title' : 'Geopotential at 1000 hPa, NZ domain', 'filename': 'HGT_1000_NZ_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'HGT 1000 NZ domain composite', 40)
+
+"""
+HGT at 1000 hPa, NZ domain, one map per year
+"""
+
+f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h').plot(subplots=True)
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ_years.png'))
+
+images.append({'id': 'hgt_1000_NZ_samples', 'title' : 'Geopotential at 1000 hPa, NZ domain, analog years', 'filename': 'HGT_1000_NZ_sample_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'HGT 1000 NZ domain analogs', 50)
 
 # ==============================================================================
 """
@@ -262,8 +312,41 @@ images.append({'id': 'indices_proxy', 'title' : 'Climate Indices', 'filename': '
 plt.close(f)
 
 if verbose:
-    save_progress(opath, 'Complete', 100)
+    save_progress(opath, 'climate indices', 60)
 
+
+"""
+Weather Regimes
+"""
+
+w = WR(p, classification='New Zealand')
+
+f = w.plot_bar(sig=1)
+
+f.savefig(os.path.join(opath, 'NZ_regimes_proxy.png'))
+
+images.append({'id': 'NZ_regimes_proxy', 'title' : 'NZ weather regimes (Kidson Types)', 'filename': 'NZ_regimes_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'NZ weather regimes', 70)
+
+w = WR(p, classification='SW Pacific')
+
+f = w.plot_bar(sig=1)
+
+f.savefig(os.path.join(opath, 'SWPac_regimes_proxy.png'))
+
+images.append({'id': 'SWPac_regimes_proxy', 'title' : 'Southwest Pacific weather regimes', 'filename': 'SWPac_regimes_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'SW Pacific weather regimes', 80)
+
+if verbose:
+    save_progress(opath, 'Complete', 100)
 
 # Save images list to json file
 with open(os.path.join(opath, 'images.json'), 'w') as f:
