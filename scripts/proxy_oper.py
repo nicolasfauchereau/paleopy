@@ -2,6 +2,7 @@
 import os
 import sys
 import argparse
+import json
 
 import matplotlib
 matplotlib.use('Agg')
@@ -66,8 +67,8 @@ parser.add_argument('-val','--value', dest='value', default=0.6, \
 help="""the value for the proxy: can be either a float or a string, if a string, must be in
 ['WB','B','N','A','WA'] and the `qualitative` flag must be set to True""")
 
-parser.add_argument('-q','--qualitative', dest='qualitative', type=bool, default=False, \
-help='a flag indicating whether the value passed (see above) is qualitative or not, default to False: \
+parser.add_argument('-q','--qualitative', dest='qualitative', type=int, default=0, \
+help='a flag indicating whether the value passed (see above) is qualitative or not, default to 0 (False): \
 i.e. interpret the value as a float')
 
 parser.add_argument('-per','--period', dest='period', type=str, default="1979-2014", \
@@ -76,11 +77,11 @@ help='the period from which to draw the analog seasons')
 parser.add_argument('-clim','--climatology', dest='climatology', type=str, default="1981-2010", \
 help='the climatological period with respect to which the anomalies are calculated')
 
-parser.add_argument('-an','--calc_anoms', dest='calc_anoms', type=bool, default=True, \
-help='True if the anomalies are calculated, False otherwise. Default is True')
+parser.add_argument('-an','--calc_anoms', dest='calc_anoms', type=int, default=1, \
+help='True if the anomalies are calculated, False otherwise. Default is 1 (True)')
 
-parser.add_argument('-dt','--detrend', dest='detrend', type=bool, default=True, \
-help='True if the time-series need detrended, False otherwise. Default is True')
+parser.add_argument('-dt','--detrend', dest='detrend', type=int, default=1, \
+help='True if the time-series need detrended, False otherwise. Default is 1 (True)')
 
 parser.add_argument('-a','--aspect', dest='aspect', type=float, default=None, \
 help='the aspect (in degrees, from 0 to 360)')
@@ -100,7 +101,7 @@ help='the chronology control (i.e. 14C, Historic, Dendrochronology, etc)')
 parser.add_argument('-m','--measurement', dest='measurement', type=str, default=None, \
 help='the proxy measurement type (e.g. width for tree rings)')
 
-parser.add_argument('-v', '--verbose', dest='verbose', type=bool, default=False,
+parser.add_argument('-v', '--verbose', dest='verbose', type=int, default=0,
 help='Output progress')
 
 """
@@ -119,14 +120,19 @@ opath = vargs.pop('opath')
 pop `verbose` out of the dictionnary
 """
 
-verbose = vargs.pop('verbose')
+verbose = bool(vargs.pop('verbose'))
 
+print(verbose)
 
 """
 instantiates a proxy class, pass the `vargs` dict of keyword arguments to the class
 """
 
 p = proxy(**vargs)
+
+"""
+process the proxy
+"""
 
 """
 initialise output file list
@@ -154,6 +160,7 @@ plt.close(f)
 # 3: save the proxy in the JSON file
 p.proxy_repr()
 
+
 """
 instantiate the analog classes with the proxy for each dataset + variable we
 want to map
@@ -180,7 +187,6 @@ if p.dataset == 'vcsn':
         plt.close(f)
 
 
-
 # ==============================================================================
 """
 Sea Surface Temperatures, global
@@ -195,7 +201,6 @@ f.savefig(os.path.join(opath,'SST_proxy.png'))
 images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'SST_proxy.png'})
 
 plt.close(f)
-
 
 """
 HGT at 850 hPa, global
@@ -229,7 +234,6 @@ plt.close(f)
 
 if verbose:
     save_progress(opath, 'Complete', 100)
-
 
 # Save images list to json file
 with open(os.path.join(opath, 'images.json'), 'w') as f:
