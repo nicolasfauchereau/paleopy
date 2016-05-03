@@ -16,6 +16,8 @@ from paleopy import analogs
 from paleopy import ensemble
 from paleopy.plotting import scalar_plot
 from paleopy.plotting import indices
+from paleopy import WR
+
 
 """
 import the little progress file indicator, really
@@ -128,6 +130,8 @@ print(verbose)
 instantiates a proxy class, pass the `vargs` dict of keyword arguments to the class
 """
 
+print(vargs)
+
 p = proxy(**vargs)
 
 """
@@ -202,6 +206,9 @@ images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'SS
 
 plt.close(f)
 
+if verbose:
+    save_progress(opath, 'SST global', 10)
+
 """
 HGT at 850 hPa, global
 """
@@ -217,7 +224,54 @@ images.append({'id': 'hgt_850', 'title' : 'Geopotential at 850 hPa', 'filename':
 plt.close(f)
 
 if verbose:
-    save_progress(opath, 'Climate Indices', 80)
+    save_progress(opath, 'HGT 850 global', 20)
+
+"""
+HGT at 1000 hPa, global
+"""
+
+hgt = analogs(p, 'ncep', 'hgt_1000').composite()
+
+f = scalar_plot(hgt, test=0.05, proj='cyl').plot()
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy.png'))
+
+images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'HGT_1000_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'HGT 1000 global', 30)
+
+"""
+HGT at 1000 hPa, NZ domain, composite
+"""
+
+f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h').plot(subplots=False)
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ.png'))
+
+images.append({'id': 'hgt_1000_NZ', 'title' : 'Geopotential at 1000 hPa, NZ domain', 'filename': 'HGT_1000_NZ_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'HGT 1000 NZ domain composite', 40)
+
+"""
+HGT at 1000 hPa, NZ domain, one map per year
+"""
+
+f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h').plot(subplots=True)
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ_years.png'))
+
+images.append({'id': 'hgt_1000_NZ_samples', 'title' : 'Geopotential at 1000 hPa, NZ domain, analog years', 'filename': 'HGT_1000_NZ_sample_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'HGT 1000 NZ domain analogs', 50)
 
 # ==============================================================================
 """
@@ -231,6 +285,40 @@ f.savefig(os.path.join(opath, 'indices_proxy.png'))
 images.append({'id': 'indices_proxy', 'title' : 'Climate Indices', 'filename': 'indices_proxy.png'})
 
 plt.close(f)
+
+if verbose:
+    save_progress(opath, 'climate indices', 60)
+
+
+"""
+Weather Regimes
+"""
+
+w = WR(p, classification='New Zealand')
+
+f = w.plot_bar(sig=1)
+
+f.savefig(os.path.join(opath, 'NZ_regimes_proxy.png'))
+
+images.append({'id': 'NZ_regimes_proxy', 'title' : 'NZ weather regimes (Kidson Types)', 'filename': 'NZ_regimes_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'NZ weather regimes', 70)
+
+w = WR(p, classification='SW Pacific')
+
+f = w.plot_bar(sig=1)
+
+f.savefig(os.path.join(opath, 'SWPac_regimes_proxy.png'))
+
+images.append({'id': 'SWPac_regimes_proxy', 'title' : 'Southwest Pacific weather regimes', 'filename': 'SWPac_regimes_proxy.png'})
+
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'SW Pacific weather regimes', 80)
 
 if verbose:
     save_progress(opath, 'Complete', 100)
