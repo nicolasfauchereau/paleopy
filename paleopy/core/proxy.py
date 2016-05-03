@@ -158,8 +158,8 @@ class proxy:
     aspect=None, elevation=None, dating_convention=None, calendar=None, \
     chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', \
     pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, \
-    qualitative=False, period="1979-2014", climatology="1981-2010", \
-    calc_anoms=True, detrend=True, method='quintiles'):
+    qualitative=0, period="1979-2014", climatology="1981-2010", \
+    calc_anoms=1, detrend=1, method='quintiles'):
 
         super(proxy, self).__init__()
         if lon < 0:
@@ -181,11 +181,11 @@ class proxy:
         self.calendar = calendar
         self.season = season
         self.value = value
-        self.qualitative = qualitative
+        self.qualitative = bool(qualitative)
         self.period = tuple(map(int,period.split("-"))) # to correct the type
         self.climatology = tuple(map(int,climatology.split("-"))) # to correct the type
-        self.calc_anoms = calc_anoms
-        self.detrend = detrend
+        self.calc_anoms = bool(calc_anoms)
+        self.detrend = bool(detrend)
         self.method = method
 
     def read_dset_params(self):
@@ -225,18 +225,12 @@ class proxy:
         calculate the weights for compositing
         """
         tmp_df = df.copy(deep=True)
-        if self.calc_anoms and not self.detrend:
-            weights = abs(self.value - tmp_df.loc[:,'anomalies']) / sum(abs(self.value - tmp_df.loc[:,'anomalies']))
-            tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
-        if self.calc_anoms and self.detrend:
-            weights = abs(self.value - tmp_df.loc[:,'d_anomalies']) / sum(abs(self.value - tmp_df.loc[:,'d_anomalies']))
-            tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
-        if not self.calc_anoms and self.detrend:
-            weights = abs(self.value - tmp_df.loc[:,'d_' + self.variable]) / sum(abs(self.value - tmp_df.loc[:,'d_' + self.variable]))
-            tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
-        if not self.calc_anoms and not self.detrend:
-            weights = abs(self.value - tmp_df.loc[:,self.variable]) / sum(abs(self.value - tmp_df.loc[:,self.variable]))
-            tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
+        # print(self.value)
+        # print(type(self.value))
+        # print(type(tmp_df.iloc[:,0].values))
+        # print(np.abs(self.value - tmp_df.iloc[:,0].values.flatten()))
+        weights = abs(self.value - tmp_df.iloc[:,0]) / sum(abs(self.value - tmp_df.iloc[:,0]))
+        tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
         return tmp_df
 
     def extract_ts(self):
@@ -366,16 +360,20 @@ class proxy:
              self.calculate_season()
 
         if self.calc_anoms and not self.detrend:
-            ts = self.ts_seas.loc[:,'anomalies']
+            ts = self.ts_seas.loc[:,['anomalies']].copy(deep=True)
         if self.calc_anoms and self.detrend:
-            ts = self.ts_seas.loc[:,'d_anomalies']
+            ts = self.ts_seas.loc[:,['d_anomalies']].copy(deep=True)
         if not self.calc_anoms and self.detrend:
-            ts = self.ts_seas.loc[:,'d_' + self.variable]
+            ts = self.ts_seas.loc[:,['d_' + self.variable]].copy(deep=True)
         if not self.calc_anoms and not self.detrend:
-            ts = self.ts_seas.loc[:,self.variable]
+            ts = self.ts_seas.loc[:,[self.variable]].copy(deep=True)
 
         labels=['WB','B','N','A','WA']
-        self.ts_seas.loc[:,'cat'], bins = pd.qcut(ts, 5, labels=labels, retbins=True)
+
+        sub, bins = pd.qcut(ts.iloc[:,0], 5, labels=labels, retbins=True)
+
+        ts.loc[:,'cat'] = sub
+
         # if the flag qualitative is set to True (default is false)
         # then we search the years corresponding to the category
         if self.qualitative:
@@ -383,34 +381,27 @@ class proxy:
             if self.value not in labels:
                 raise ValueError("category not in ['WB','B','N','A','WA']")
             else:
-                tmp_df = self.ts_seas[self.ts_seas['cat'] == self.value].copy(deep=True)
+                tmp_df = ts[ts['cat'] == self.value].copy(deep=True)
                 tmp_df.loc[:,'weights'] = 1. / len(tmp_df)
                 self.analogs = tmp_df
                 self.weights = self.analogs.loc[:,'weights'].values
                 self.category = self.value
         # if value is quantitative we use the method ("quintiles" or "closest eight")
         else:
+            self.value = float(self.value)
             if self.method == 'quintiles':
                 bins[0] = -np.inf
                 bins[-1] = np.inf
                 category = labels[np.searchsorted(bins, np.float(self.value))-1]
-                subset = self.ts_seas[self.ts_seas['cat'] == category]
+                subset = ts[ts['cat'] == category]
                 self.category = category
                 tmp_df = subset.copy(deep=True)
                 # calculates the weights (add to 1)
                 self.analogs = self._calc_weights(tmp_df)
                 self.quintiles = bins
             elif self.method == "closest 8":
-                if self.calc_anoms and not self.detrend:
-                    ts_close = self.ts_seas.loc[:,'anomalies']
-                if self.calc_anoms and self.detrend:
-                    ts_close = self.ts_seas.loc[:,'d_anomalies']
-                if not self.calc_anoms and self.detrend:
-                    ts_close = self.ts_seas.loc[:,'d_' + self.variable]
-                if not self.calc_anoms and not self.detrend:
-                    ts_close = self.ts_seas.loc[:,self.variable]
-                sub = (abs(self.value - ts_close)).sort_values()[:8].index
-                tmp_df = self.ts_seas.loc[sub,:].copy(deep=True)
+                sub = (abs(self.value - ts)).sort_values()[:8].index
+                tmp_df = ts.loc[sub,:].copy(deep=True)
                 # calculates the weights (add to 1)
                 self.analogs = self._calc_weights(tmp_df)
                 self.category = self.analogs.loc[:,'cat'].values
