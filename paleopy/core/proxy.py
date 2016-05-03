@@ -400,7 +400,7 @@ class proxy:
                 self.analogs = self._calc_weights(tmp_df)
                 self.quintiles = bins
             elif self.method == "closest 8":
-                sub = (abs(self.value - ts)).sort_values()[:8].index
+                sub = (abs(self.value - ts.iloc[:,0])).sort_values()[:8].index
                 tmp_df = ts.loc[sub,:].copy(deep=True)
                 # calculates the weights (add to 1)
                 self.analogs = self._calc_weights(tmp_df)
