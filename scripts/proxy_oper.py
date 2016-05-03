@@ -2,6 +2,7 @@
 import os
 import sys
 import argparse
+
 import json
 
 import matplotlib
@@ -151,17 +152,17 @@ if verbose:
     save_progress(opath, 'Process the proxy', 0)
 p.find_analogs()
 
-# 2: plot the time-series of seasonal values with the analog years and save
+# 2: save the proxy in the JSON file
+p.proxy_repr()
+
+# 3: plot the time-series of seasonal values with the analog years and save
+if verbose:
+    save_progress(opath, 'Time Series', 10)
 f = p.plot_season_ts()
 
 f.savefig(os.path.join(opath, 'time_series.png'))
-
 images.append({'id': 'time_series', 'title' : 'Analog Seasons', 'filename': 'time_series.png'})
-
 plt.close(f)
-
-# 3: save the proxy in the JSON file
-p.proxy_repr()
 
 """
 instantiate the analog classes with the proxy for each dataset + variable we
@@ -221,6 +222,22 @@ f.savefig(os.path.join(opath,'hgt_850_proxy.png'))
 images.append({'id': 'hgt_850', 'title' : 'Geopotential at 850 hPa', 'filename': 'HGT_850_proxy.png'})
 
 plt.close(f)
+
+"""
+HGT at 1000 hPa, global
+"""
+if verbose:
+    save_progress(opath, 'HGT at 850 hPa', 40)
+
+hgt = analogs(p, 'ncep', 'hgt_1000').composite()
+
+f = scalar_plot(hgt, test=0.05, proj='cyl').plot()
+
+f.savefig(os.path.join(opath,'hgt_1000_proxy.png'))
+
+images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'HGT_1000_proxy.png'})
+plt.close(f)
+
 # ==============================================================================
 # Check if this two images are necessary
 """
@@ -235,9 +252,10 @@ f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map2_proxy.png'))
 images.append({'id': 'uwnd_200', 'title' : 'Zonal Wind at 200hPa', 'filename': 'map2_proxy.png'})
+plt.close(f)
 
 if verbose:
-    save_progress(opath, 'UWND at 850hpa', 70)
+    save_progress(opath, 'UWND at 850hpa', 60)
 
 uwnd = analogs(p, 'ncep', 'uwnd_850').composite()
 
@@ -245,7 +263,21 @@ f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
 
 f.savefig(os.path.join(opath, 'map3_proxy.png'))
 images.append({'id': 'uwnd_850', 'title' : 'Zonal Wind at 850hPa', 'filename': 'map3_proxy.png'})
+plt.close(f)
+
+if verbose:
+    save_progress(opath, 'UWND at 1000hpa', 70)
+
+uwnd = analogs(p, 'ncep', 'uwnd_1000').composite()
+
+f = scalar_plot(uwnd, test=0.05, proj='cyl').plot()
+
+f.savefig(os.path.join(opath, 'map4_proxy.png'))
+images.append({'id': 'uwnd_1000', 'title' : 'Zonal Wind at 1000hPa', 'filename': 'map4_proxy.png'})
+plt.close(f)
+
 # ========== ^^^^^^^^
+
 
 
 if verbose:
