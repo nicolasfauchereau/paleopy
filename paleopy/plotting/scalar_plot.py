@@ -202,7 +202,7 @@ class scalar_plot:
             if (mat.shape[0] % 2) > 0:
                 nsubplots = mat.shape[0] + 1
             else:
-                nsubplots = data.shape[0]
+                nsubplots = mat.shape[0]
 
             """
             creates the figure
