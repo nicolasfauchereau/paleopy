@@ -145,7 +145,7 @@ process the proxy
 p.find_analogs()
 
 # 2: plot the time-series of seasonal values with the analog years and save
-f = p.plot_season_ts()
+f = p.plot()
 
 f.savefig(os.path.join(opath, 'time_series.png'))
 
@@ -166,21 +166,22 @@ if the attached dataset is the VCSN dataset, we plot the corresponding composite
 anomalies for the variable the proxy is sensitive to
 """
 
-if p.dataset == 'vcsn':
-    if p.variable == 'Rain':
-        vcsn = analogs(p, 'vcsn', 'Rain').composite()
-        f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h').plot(subplots=False)
-        f.savefig(os.path.join(opath,'VCSN_rain_proxy.png'))
-        images.append({'id': 'vcsn_rain', 'title' : 'VCSN seasonal rainfall', 'filename': 'vcsn_rain_proxy.png'})
-        plt.close(f)
+dataset = p.dataset
+variable = p.variable
 
-    if p.variable == 'TMean':
-        vcsn = analogs(p, 'vcsn', 'TMean').composite()
-        f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h').plot(subplots=False)
-        f.savefig(os.path.join(opath,'VCSN_tmean_proxy.png'))
-        images.append({'id': 'vcsn_tmean', 'title' : 'VCSN seasonal Temperatures', 'filename': 'vcsn_tmean_proxy.png'})
-        plt.close(f)
+compos = analogs(p, dataset, variable).composite()
 
+if dataset in ['vcsn']:
+    f = scalar_plot(compos, test=0.1, proj='cyl', res='h').plot(subplots=False)
+else:
+    f = scalar_plot(compos, test=0.1, proj='cyl', res='i').plot(subplots=False)
+
+images.append({'id': '{}_{}'.format(dataset, variable), 'title' : '{} seasonal {}'.format(dataset, variable), 'filename': '{}_{}_proxy.png'.format(dataset, variable)})
+
+plt.close(f)
+
+data_var = {}
+data_var['ncep'] = ['hgt_1000','hgt_850']
 
 # ==============================================================================
 """
