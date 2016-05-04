@@ -124,19 +124,11 @@ pop `verbose` out of the dictionnary
 
 verbose = bool(vargs.pop('verbose'))
 
-print(verbose)
-
 """
 instantiates a proxy class, pass the `vargs` dict of keyword arguments to the class
 """
 
-print(vargs)
-
 p = proxy(**vargs)
-
-"""
-process the proxy
-"""
 
 """
 initialise output file list
@@ -163,7 +155,6 @@ plt.close(f)
 
 # 3: save the proxy in the JSON file
 p.proxy_repr()
-
 
 """
 instantiate the analog classes with the proxy for each dataset + variable we
