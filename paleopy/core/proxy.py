@@ -7,13 +7,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from dateutil.relativedelta import relativedelta
 import json
-import xray
+
+try:
+    import xarray as xray
+except:
+    try:
+        import xray
+    except ImportError:
+        print('cannot import xarray or xray')
+
 from scipy.stats import linregress
 
 # relative imports
-from ..utils.do_kdtree import do_kdtree
-from ..utils.haversine import haversine
-from ..utils.pprint_od import pprint_od
+from ..utils import do_kdtree
+from ..utils import haversine
+from ..utils import pprint_od
 from ..utils import seasons_params
 
 import warnings
@@ -113,6 +121,11 @@ class proxy:
             done
             user-defined, default is True
 
+    method : string
+            can be either 'closest 8' or 'quintiles'
+            to specicify the method employed to choose
+            the analog seasons
+
     aspect : float
             The aspect of the proxy site (in degrees from 0 to 360)
             user-defined, no default
@@ -141,8 +154,13 @@ class proxy:
     ----------
     """
 
-    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, aspect=None, elevation=None, dating_convention=None, calendar=None, chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, qualitative=False, \
-                 period="1979-2014", climatology="1981-2010", calc_anoms=True, detrend=True):
+    def __init__(self, sitename=None, proxy_type=None, lon=None, lat=None, \
+    aspect=None, elevation=None, dating_convention=None, calendar=None, \
+    chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', \
+    pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, \
+    qualitative=0, period="1979-2014", climatology="1981-2010", \
+    calc_anoms=1, detrend=1, method='quintiles'):
+
         super(proxy, self).__init__()
         if lon < 0:
             lon += 360.
@@ -163,18 +181,28 @@ class proxy:
         self.calendar = calendar
         self.season = season
         self.value = value
-        self.qualitative = qualitative
+        self.qualitative = bool(qualitative)
         self.period = tuple(map(int,period.split("-"))) # to correct the type
         self.climatology = tuple(map(int,climatology.split("-"))) # to correct the type
-        self.calc_anoms = calc_anoms
-        self.detrend = detrend
+        self.calc_anoms = bool(calc_anoms)
+        self.detrend = bool(detrend)
+        self.method = method
 
     def read_dset_params(self):
+        """
+        reads the `datasets.json` file and loads the dictionnary
+        containing all the parameters for this dataset
+        """
         with open(os.path.join(self.djsons, 'datasets.json'), 'r') as f:
             dset_dict = json.loads(f.read())
         self.dset_dict = dset_dict[self.dataset][self.variable]
 
     def check_domain(self):
+        """
+        checks if the domain that is passed
+        is compatible with the domain of the
+        dataset
+        """
         if not(hasattr(self, 'dset_dict')):
             self.read_dset_params()
         domain = self.dset_dict['domain']
@@ -192,7 +220,24 @@ class proxy:
             """.format(self.dataset))
             raise Exception("DOMAIN ERROR")
 
+    def _calc_weights(self, df):
+        """
+        calculate the weights for compositing
+        """
+        tmp_df = df.copy(deep=True)
+        # print(self.value)
+        # print(type(self.value))
+        # print(type(tmp_df.iloc[:,0].values))
+        # print(np.abs(self.value - tmp_df.iloc[:,0].values.flatten()))
+        weights = abs(self.value - tmp_df.iloc[:,0]) / sum(abs(self.value - tmp_df.iloc[:,0]))
+        tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
+        return tmp_df
+
     def extract_ts(self):
+        """
+        extract the time-series for the closest grid-point to
+        the passed proxy coordinates
+        """
         # checks the domain first
         self.check_domain()
         # if all good, we proceed
@@ -235,7 +280,14 @@ class proxy:
             self.ts = pd.DataFrame(ts.loc[:,self.variable])
         dset.close()
 
+        return self
+
     def calculate_season(self):
+        """
+        calculates the seasonal values, can be either raw
+        or anomalies depending on the parameter (boolean) `calc_anoms`
+        passed when instantiating the `proxy` class
+        """
         season = self.season
         start_clim = str(self.climatology[0])
         end_clim = str(self.climatology[1])
@@ -244,12 +296,22 @@ class proxy:
         # value =  a tuple (length of the season, month of the end of the season)
         self.seasons_params = seasons_params()
 
+        if not(hasattr(self, 'ts')):
+            self.extract_ts()
+
         # if the variable is rainfall, we calculate rolling sum
         if self.dset_dict['units'] in ['mm']:
-            ts_seas = pd.rolling_sum(self.ts, self.seasons_params[season][0])
+            # test which version of pandas we are using
+            if pd.__version__ >= '0.18':
+                ts_seas = self.ts.rolling(window=self.seasons_params[season][0]).sum()
+            else:
+                ts_seas = pd.rolling_sum(self.ts, self.seasons_params[season][0])
         # else we calculate the rolling mean (average)
         else:
-            ts_seas = pd.rolling_mean(self.ts, self.seasons_params[season][0])
+            if pd.__version__ >= '0.18':
+                ts_seas = self.ts.rolling(window=self.seasons_params[season][0]).mean()
+            else:
+                ts_seas = pd.rolling_mean(self.ts, self.seasons_params[season][0])
 
         ts_seas = ts_seas[ts_seas.index.month == self.seasons_params[season][1]]
 
@@ -281,37 +343,70 @@ class proxy:
 
         self.ts_seas = ts_seas
 
+        return self
+
     def find_analogs(self):
-        val = self.value
+        """
+        find the analog seasons
+
+        return:
+
+        self.analogs : a pandas DataFrame
+        self.analog_years : a list with the analog years
+        self.quintiles : the bins for the quintiles used
+        """
+
+        if not(hasattr(self, 'ts_seas')):
+             self.calculate_season()
+
         if self.calc_anoms and not self.detrend:
-            ts = self.ts_seas.loc[:,'anomalies']
+            ts = self.ts_seas.loc[:,['anomalies']].copy(deep=True)
         if self.calc_anoms and self.detrend:
-            ts = self.ts_seas.loc[:,'d_anomalies']
+            ts = self.ts_seas.loc[:,['d_anomalies']].copy(deep=True)
         if not self.calc_anoms and self.detrend:
-            ts = self.ts_seas.loc[:,'d_' + self.variable]
+            ts = self.ts_seas.loc[:,['d_' + self.variable]].copy(deep=True)
         if not self.calc_anoms and not self.detrend:
-            ts = self.ts_seas.loc[:,self.variable]
+            ts = self.ts_seas.loc[:,[self.variable]].copy(deep=True)
 
         labels=['WB','B','N','A','WA']
-        self.ts_seas.loc[:,'cat'], bins = pd.qcut(ts, 5, labels=labels, retbins=True)
+
+        sub, bins = pd.qcut(ts.iloc[:,0], 5, labels=labels, retbins=True)
+
+        ts.loc[:,'cat'] = sub
+
         # if the flag qualitative is set to True (default is false)
         # then we search the years corresponding to the category
         if self.qualitative:
-            if val not in labels:
+            self.value = str(self.value)
+            if self.value not in labels:
                 raise ValueError("category not in ['WB','B','N','A','WA']")
-            subset = self.ts_seas[self.ts_seas['cat'] == val]
-            self.category = val
-        # if not, then we search in the bins
+            else:
+                tmp_df = ts[ts['cat'] == self.value].copy(deep=True)
+                tmp_df.loc[:,'weights'] = 1. / len(tmp_df)
+                self.analogs = tmp_df
+                self.weights = self.analogs.loc[:,'weights'].values
+                self.category = self.value
+        # if value is quantitative we use the method ("quintiles" or "closest eight")
         else:
-            val = np.float(val) # just to make sure val is of the right type
-            bins[0] = -np.inf
-            bins[-1] = np.inf
-            category = labels[np.searchsorted(bins, val)-1]
-            subset = self.ts_seas[self.ts_seas['cat'] == category]
-            self.category = category
-        self.analogs = subset
-        self.analog_years = subset.index.year
-        self.quintiles = bins
+            self.value = float(self.value)
+            if self.method == 'quintiles':
+                bins[0] = -np.inf
+                bins[-1] = np.inf
+                category = labels[np.searchsorted(bins, np.float(self.value))-1]
+                subset = ts[ts['cat'] == category]
+                self.category = category
+                tmp_df = subset.copy(deep=True)
+                # calculates the weights (add to 1)
+                self.analogs = self._calc_weights(tmp_df)
+                self.quintiles = bins
+            elif self.method == "closest 8":
+                sub = (abs(self.value - ts.iloc[:,0])).sort_values()[:8].index
+                tmp_df = ts.loc[sub,:].copy(deep=True)
+                # calculates the weights (add to 1)
+                self.analogs = self._calc_weights(tmp_df)
+                self.category = self.analogs.loc[:,'cat'].values
+            self.weights = self.analogs.loc[:,'weights'].values
+        self.analog_years = self.analogs.index.year
 
     def proxy_repr(self, pprint=False, outfile=True):
         """
@@ -343,8 +438,15 @@ class proxy:
         proxy_dict['extracted_coords'] = self.extracted_coords.tolist()
         proxy_dict['distance_point'] = self.distance_point
         proxy_dict['trend_params'] = self.trend_params
-        proxy_dict['category'] = self.category
+        if self.qualitative:
+            proxy_dict['category'] = self.category
+        else:
+            if self.method == 'quintiles':
+                proxy_dict['category'] = self.category
+            elif self.method == 'closest 8':
+                proxy_dict['category'] = ",".join(list(self.category))
         proxy_dict['analog_years'] = self.analog_years.tolist()
+        proxy_dict['weights'] = list(self.weights)
 
         if pprint:
             pprint_od(proxy_dict)
@@ -365,7 +467,14 @@ class proxy:
                 json.dump(proxy_dict, f)
         self.proxy_dict = proxy_dict
 
+    def to_html(filename):
+        if not(hasattr(self, 'analogs')):
+            self.find_analogs()
+
     def plot_season_ts(self, fname=None):
+        r"""
+        should move to the `plotting` submodule
+        """
 
         f, ax = plt.subplots(figsize=(8,5))
 
@@ -394,10 +503,10 @@ class proxy:
             else:
                 ya = self.analogs.loc[self.variable]
 
-        ax.plot(y.index, y.values, 'steelblue', lw=2, label='ts')
-        ax.plot(yd.index, yd.values, color='k', lw=2, label='ts (detrended)')
+        ax.plot(y.index, y.values, 'steelblue', lw=2, label='{}'.format(self.variable))
+        ax.plot(yd.index, yd.values, color='k', lw=2, label='{} (detrended)'.format(self.variable))
         ax.plot(ya.index, ya.values, 'ro', label='analog years')
-        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.4, label="")
+        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.3, label="")
 
         ax.set_xlim(y.index[0] - relativedelta(years=1), y.index[-1] + relativedelta(years=1))
 
@@ -406,7 +515,12 @@ class proxy:
 
         ax.legend(framealpha=0.4, loc='best')
 
-        [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
+        if not self.qualitative and self.method == 'quintiles':
+            [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
+
+        # add a zero line if we deal with anomalies
+        if self.calc_anoms:
+            ax.axhline(0, color='k', linewidth=0.5)
 
         ax.grid()
 

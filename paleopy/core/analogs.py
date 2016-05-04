@@ -27,6 +27,7 @@ class analogs:
         # already been checked
         self.season = self.parent.season
         self.analog_years = self.parent.analog_years
+        # self.weights = self.parent.weights
         self.detrend = self.parent.detrend
         # wet get the location(s) (lon, lat) of the proxy
         # or ensemble of proxies here
@@ -120,11 +121,30 @@ class analogs:
             self.dset['dates'] = (('dates',), dates)
             self.dset['seas_var'] = (('dates', 'latitudes', 'longitudes'), seas_field)
 
-
-    def composite(self, climatology=(1981, 2010),  test=True):
+    def composite(self, climatology=(1981, 2010),  test=True, repeats=True, weighting=False):
         """
         calculates the composite anomalies (and the Student t-test)
         from the seasonal values
+
+        Parameters
+        ----------
+
+        climatology : tuple (start_year, end_year)
+                The climatological period
+
+        test : Boolean (default = True)
+                Whether to calculate the Student T-test (p-value)
+
+        repeats : Boolean (default = False)
+                whether to include the repeated years
+                only applies when an `ensemble` object is passed to
+                the analog class, where some years can be sampled
+                repeatedly
+
+        weigthing : Boolean (default = False)
+                if True, calculate the composite anomaly
+                weigthed by the inverse absolute difference between
+                the proxy value and the analog seasons values
         """
         self.climatology = climatology
 
@@ -132,30 +152,38 @@ class analogs:
         if not(hasattr(self, 'dset')):
             self.calculate_season()
 
-        # extract the composite sample: it INCLUDES the repeated years
-        compos = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in self.analog_years], dim='dates')
+        if repeats:
+            # extract the composite sample: it INCLUDES the repeated years
+            compos_s = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in self.analog_years], dim='dates')
+            ayears = self.analog_years
+        else:
+            # extract the composite sample EXCLUDING the repeated years
+            compos_s = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in np.unique(self.analog_years)], dim='dates')
+            ayears = np.unique(self.analog_years)
 
-        # extract the composite sample EXCLUDING the repeated years
-        compos_u = xray.concat([self.dset['seas_var'].sel(dates=str(y)) for y in np.unique(self.analog_years)], dim='dates')
 
         # calculating the climatology
         clim = self.dset['seas_var'].sel(dates=slice(str(self.climatology[0]), \
                                                      str(self.climatology[1])))
 
         # calculate the anomalies WRT the climatology
-        compos_m = compos - clim.mean('dates')
+        compos_a = compos_s - clim.mean('dates')
 
-        # calculate the anomalies WRT the climatology, unique years
-        compos_u = compos_u - clim.mean('dates')
+        if weighting:
+            # if weigthing, multiply by the weights (come from
+            # either a proxy or an ensemble)
 
-        # mask if needed
-        compos_u = ma.masked_array(compos_u, np.isnan(compos_u))
+            # cast that into a xray.DataArray sharing the same axis than the composite anomalies
+            weights_arr = xray.DataArray(np.array(self.parent.weights), dims=('dates'), coords={'dates':compos_a.dates.data})
 
-        compos_m = ma.masked_array(compos_m, np.isnan(compos))
+            compos_a = (compos_a * weights_arr) / weights_arr.sum('dates')
 
+        # get the composite anomalies into a DataArray
+        compos_a_x = xray.DataArray(ma.masked_array(compos_a, np.isnan(compos_a)), dims=('years','latitudes','longitudes'),
+                              coords={'years':ayears, 'latitudes':self.dset.latitudes, 'longitudes':self.dset.longitudes})
         # if test is True, then the standard Student t-test is calculated
         if test:
-            t, pvalues = ttest_ind(compos.data, clim.data, axis=0)
+            t, pvalues = ttest_ind(compos_s.data, clim.data, axis=0)
             # pvalues contains the p-values, we can delete the Test statistics
             del(t)
 
@@ -166,14 +194,18 @@ class analogs:
         # store the anomalies and the composite anomalies
         # in the xray Dataset
 
-        self.dset['years'] = (('years',), np.unique(self.analog_years))
-        self.dset['composite_sample'] = \
-        (('years','latitudes', 'longitudes'), compos_u)
-        self.dset['composite_anomalies'] = \
-        (('latitudes', 'longitudes'), compos_m.mean(0).data)
+        self.dset['years'] = (('years',), ayears)
+
+        self.dset['composite_sample'] = compos_a_x
+
+        self.dset['composite_anomalies'] = compos_a_x.mean('years')
+
+        self.dset['weights'] = xray.DataArray(np.array(self.parent.weights), dims=('years'), coords={'years':compos_a_x.years.data})
+
         # saves the p-values
         self.dset['pvalues'] = \
         (('latitudes', 'longitudes'), pvalues)
+
         # set the attributes
         self.dset['latitudes'].attrs['units'] = 'degrees_north'
         self.dset['latitudes'].attrs['long_name'] = 'Latitudes'

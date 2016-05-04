@@ -3,7 +3,6 @@ import os
 import sys
 import argparse
 
-from collections import OrderedDict as od
 import json
 
 import matplotlib
@@ -16,19 +15,11 @@ from paleopy import ensemble
 from paleopy import WR
 from paleopy.plotting import scalar_plot
 from paleopy.plotting import indices
+from paleopy.utils import save_progress
 
 """
 Global function for saving progress
 """
-
-
-def save_progress(path=None, step=None, value=0):
-    progress = od()
-    progress['step'] = step
-    progress['percentage'] = value
-    with open(os.path.join(path, 'output.json'), 'w') as f:
-        json.dump(progress, f)
-
 
 """
 parse command line arguments
