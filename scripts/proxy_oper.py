@@ -181,7 +181,7 @@ if p.dataset == 'vcsn':
 
     if p.variable == 'TMean':
         vcsn = analogs(p, 'vcsn', 'TMean').composite()
-        f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.0, vmax=1.0).plot(subplots=False)
+        f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.5, vmax=1.5).plot(subplots=False)
         f.savefig(os.path.join(opath,'VCSN_tmean_proxy.png'))
         images.append({'id': 'vcsn_tmean', 'title' : 'VCSN seasonal Temperatures', 'filename': 'VCSN_tmean_proxy.png'})
         plt.close(f)
@@ -194,7 +194,7 @@ Sea Surface Temperatures, global
 if verbose:
     save_progress(opath, 'SST', 20)
 sst = analogs(p, 'ersst', 'sst').composite()
-f = scalar_plot(sst, test=0.1, proj='cyl', vmin=-1.0, vmax=1.0).plot()
+f = scalar_plot(sst, test=0.1, proj='cyl', vmin=-1.5, vmax=1.5).plot()
 f.savefig(os.path.join(opath,'SST_proxy.png'))
 images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'SST_proxy.png'})
 plt.close(f)
