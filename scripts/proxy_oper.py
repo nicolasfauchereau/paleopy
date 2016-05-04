@@ -133,10 +133,6 @@ instantiates a proxy class, pass the `vargs` dict of keyword arguments to the cl
 p = proxy(**vargs)
 
 """
-process the proxy
-"""
-
-"""
 initialise output file list
 """
 
