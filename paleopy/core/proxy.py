@@ -5,7 +5,6 @@ import numpy as np
 from numpy import ma
 import pandas as pd
 import matplotlib.pyplot as plt
-from dateutil.relativedelta import relativedelta
 import json
 
 try:
@@ -23,6 +22,7 @@ from ..utils import do_kdtree
 from ..utils import haversine
 from ..utils import pprint_od
 from ..utils import seasons_params
+from ..plotting import plot_season_ts
 
 import warnings
 warnings.filterwarnings(action='ignore', category=FutureWarning)
@@ -471,69 +471,6 @@ class proxy:
         if not(hasattr(self, 'analogs')):
             self.find_analogs()
 
-    def plot_season_ts(self, fname=None):
-        r"""
-        should move to the `plotting` submodule
-        """
-
-        f, ax = plt.subplots(figsize=(8,5))
-
-        if self.calc_anoms:
-            y = self.ts_seas.loc[:,'anomalies']
-            vmin = y.min() -0.1 * (np.abs(y.min()))
-            vmax = y.max() +0.1 * (np.abs(y.min()))
-
-            yd = self.ts_seas.loc[:,'d_anomalies']
-
-            if self.detrend:
-                ya = self.analogs.loc[:,'d_anomalies']
-            else:
-                ya = self.analogs.loc[:,'anomalies']
-
-        else:
-
-            y = self.ts_seas.loc[:,self.variable]
-            vmin = y.min() -0.01 * (np.abs(y.min()))
-            vmax = y.max() +0.01 * (np.abs(y.min()))
-
-            yd = self.ts_seas.loc[:,'d_' + self.variable]
-
-            if self.detrend:
-                ya = self.analogs.loc[:,'d_' + self.variable]
-            else:
-                ya = self.analogs.loc[:,self.variable]
-
-        ax.plot(y.index, y.values, 'steelblue', lw=2, label='{}'.format(self.variable))
-        ax.plot(yd.index, yd.values, color='k', lw=2, label='{} (detrended)'.format(self.variable))
-        ax.plot(ya.index, ya.values, 'ro', label='analog years')
-        ax.vlines(ya.index, vmin, vmax, lw=5, alpha=0.3, label="")
-
-        ax.set_xlim(y.index[0] - relativedelta(years=1), y.index[-1] + relativedelta(years=1))
-
-        ax.set_ylim(vmin, vmax)
-        ax.set_ylabel(self.variable +": " + self.dset_dict['units'], fontsize=14)
-
-        ax.legend(framealpha=0.4, loc='best')
-
-        if not self.qualitative and self.method == 'quintiles':
-            [ax.axhline(b, color='magenta', zorder=1, alpha=0.5) for b in self.quintiles[1:-1]]
-
-        # add a zero line if we deal with anomalies
-        if self.calc_anoms:
-            ax.axhline(0, color='k', linewidth=0.5)
-
-        ax.grid()
-
-        lyears = ",".join(map(str, self.analogs.index.year.tolist()))
-
-        ax.set_title("Analog seasons for {} {} from {} {}:\n{}".format(self.season, self.sitename, self.dataset,
-                                                                    self.variable, lyears, fontsize=14))
-
-        [l.set_fontsize(14) for l in ax.xaxis.get_ticklabels()]
-        [l.set_fontsize(14) for l in ax.yaxis.get_ticklabels()]
-
-        if fname:
-            f.savefig(fname, dpi=200)
-            plt.close(f)
-
+    def plot(self):
+        f = plot_season_ts(self)
         return f
