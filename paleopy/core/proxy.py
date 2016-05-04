@@ -457,7 +457,7 @@ class proxy:
             # --------------------------------------------------------
             # proxy_name = self.sitename.replace(" ","_")
             # proxy_name = proxy_name.replace(".","")
-            #fname = "{}.json".format(self.sitename.replace(" ","_"))
+            # fname = "{}.json".format(self.sitename.replace(" ","_"))
             # now the name of the JSON file is a parameter that is
             # passed to the script "proxy_oper" by the PHP layer
             # --------------------------------------------------------
@@ -488,7 +488,7 @@ class proxy:
             if self.detrend:
                 ya = self.analogs.loc[:,'d_anomalies']
             else:
-                ya = self.analogs.loc['anomalies']
+                ya = self.analogs.loc[:,'anomalies']
 
         else:
 
@@ -501,7 +501,7 @@ class proxy:
             if self.detrend:
                 ya = self.analogs.loc[:,'d_' + self.variable]
             else:
-                ya = self.analogs.loc[self.variable]
+                ya = self.analogs.loc[:,self.variable]
 
         ax.plot(y.index, y.values, 'steelblue', lw=2, label='{}'.format(self.variable))
         ax.plot(yd.index, yd.values, color='k', lw=2, label='{} (detrended)'.format(self.variable))
