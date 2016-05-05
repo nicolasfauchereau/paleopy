@@ -22,7 +22,7 @@ def bar(wr, sig):
         if not(hasattr(wr, 'df_anoms')):
             wr.probs_anomalies(kind='many')
 
-        if wr.df_anoms.shape[1] < 5:
+        if wr.df_anoms.shape[1] < 3:
             print("""
             not enough proxies in the ensemble, size was {}
             need at list 5
