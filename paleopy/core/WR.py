@@ -6,7 +6,7 @@ import pandas as pd
 import h5py
 import json
 
-from ..markov import *
+from ..markov import get_probs
 from ..utils import seasons_params
 from ..plotting import heatmap
 from ..plotting import bar

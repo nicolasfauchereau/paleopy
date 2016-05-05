@@ -1,5 +1,5 @@
-import numpy as np
 def simulate(mu,p,N,states):
+    import numpy as np
     """
     simulate a discrete K states markov chain time-series given:
         INPUTS

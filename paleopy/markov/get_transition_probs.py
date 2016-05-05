@@ -1,7 +1,7 @@
-import numpy as np
-import pandas as pd
 
 def get_transition_probs(x, classes=None):
+    import numpy as np
+    import pandas as pd
     """
     x is a dataframe or a time-series
 
