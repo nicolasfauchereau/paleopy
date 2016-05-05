@@ -2,17 +2,35 @@ import os
 import numpy as np
 from numpy import ma
 import json
-import xray
 import bottleneck  as bn
 from matplotlib.mlab import detrend_linear
 from scipy.stats import ttest_ind
 from ..utils import seasons_params
-# from utils import seasons_params
+
+try:
+    import xarray as xray
+except:
+    try:
+        import xray
+    except ImportError:
+        print('cannot import xarray or xray')
 
 class analogs:
     """
     base class for analogs calculations,
     takes either a `proxy` or `ensemble` instance
+
+    Parameters
+    ----------
+
+    dataset : string
+            The name of the dataset for which the composite are to be calculated
+            e.g. ['ersst','ncep','vcsn','gpcp']
+
+    variable : string
+            The name of the variable to consider for calculing the composite
+            e.g. for 'ersst', it's 'sst', for 'ncep', can be ['hgt_1000',
+            'hgt_850', etc]
     """
     def __init__(self, obj, dataset, variable):
         super(analogs, self).__init__()

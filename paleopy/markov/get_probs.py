@@ -1,6 +1,6 @@
-import numpy as np
 
 def get_probs(x, classes):
+    import numpy as np
     """
     Returns the normalized frequencies (i.e. probability
             of occurrences) of each class (defined in classes)

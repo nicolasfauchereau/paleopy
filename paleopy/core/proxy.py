@@ -341,7 +341,9 @@ class proxy:
         ydetrend = y - yhat
         ts_seas.loc[:,'d_anomalies'] = ydetrend
 
-        self.ts_seas = ts_seas
+        # TODO: extract the period of interest only, which should
+        # be help in self.period
+        self.ts_seas = ts_seas.loc[str(period[0]):str(period[1]),:]
 
         return self
 

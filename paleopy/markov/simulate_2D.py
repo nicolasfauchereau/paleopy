@@ -2,7 +2,8 @@ import numpy as np
 
 def simulate_2D(states, freqs, trans, N=1000, P=1000):
 	"""
-
+	simulates a P vectors of size N given a unique vector of states,
+	a vector of frequencies (must sum to 1) and a transition matrix
 	"""
 	x = np.empty((N,P),dtype=np.int32)
 
