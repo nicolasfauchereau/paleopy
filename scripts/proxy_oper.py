@@ -181,59 +181,18 @@ images.append({'id': '{}_{}'.format(dataset, variable), 'title' : '{} seasonal {
 plt.close(f)
 
 data_var = {}
-data_var['ncep'] = ['hgt_1000','hgt_850']
+data_var['ncep'] = ['hgt_1000','hgt_850','uwnd_1000']
+data_var['ersst'] = ['sst']
+data_var['gpcp'] = ['Rain']
 
-# ==============================================================================
-"""
-Sea Surface Temperatures, global
-"""
+for dataset in data_var.keys():
+    variables = data_var[dataset]
+    for var in variables:
+        compos = analogs(p, dataset, var).composite()
+        f = scalar_plot(compos, test=0.1, proj='cyl').plot()
+        f.savefig(os.path.join(opath,'{}_{}.png'.format(dataset, var)))
+        images.append({'id': var, 'title' : var, 'filename': '{}_{}.png'.format(dataset, var)})
 
-sst = analogs(p, 'ersst', 'sst').composite()
-
-f = scalar_plot(sst, test=0.1, proj='cyl').plot()
-
-f.savefig(os.path.join(opath,'SST_proxy.png'))
-
-images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'SST_proxy.png'})
-
-plt.close(f)
-
-if verbose:
-    save_progress(opath, 'SST global', 10)
-
-"""
-HGT at 850 hPa, global
-"""
-
-hgt = analogs(p, 'ncep', 'hgt_850').composite()
-
-f = scalar_plot(hgt, test=0.05, proj='cyl').plot()
-
-f.savefig(os.path.join(opath,'hgt_850_proxy.png'))
-
-images.append({'id': 'hgt_850', 'title' : 'Geopotential at 850 hPa', 'filename': 'HGT_850_proxy.png'})
-
-plt.close(f)
-
-if verbose:
-    save_progress(opath, 'HGT 850 global', 20)
-
-"""
-HGT at 1000 hPa, global
-"""
-
-hgt = analogs(p, 'ncep', 'hgt_1000').composite()
-
-f = scalar_plot(hgt, test=0.05, proj='cyl').plot()
-
-f.savefig(os.path.join(opath,'hgt_1000_proxy.png'))
-
-images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'HGT_1000_proxy.png'})
-
-plt.close(f)
-
-if verbose:
-    save_progress(opath, 'HGT 1000 global', 30)
 
 """
 HGT at 1000 hPa, NZ domain, composite

@@ -1,4 +1,4 @@
-#!/Users/nicolasf/anaconda/bin/python
+#!/Users/nicolasf/anaconda/anaconda/bin/python
 import os
 import sys
 import argparse
