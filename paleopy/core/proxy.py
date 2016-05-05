@@ -343,7 +343,7 @@ class proxy:
 
         # TODO: extract the period of interest only, which should
         # be help in self.period
-        self.ts_seas = ts_seas.loc[str(period[0]):str(period[1]),:]
+        self.ts_seas = ts_seas.loc[str(self.period[0]):str(self.period[1]),:]
 
         return self
 
