@@ -159,7 +159,7 @@ class proxy:
     chronology=None, measurement=None, djsons='./jsons', pjsons='./jsons/proxies', \
     pfname=None, dataset='ersst', variable='sst', season='DJF', value=None, \
     qualitative=0, period="1979-2014", climatology="1981-2010", \
-    calc_anoms=1, detrend=1, method='quintiles'):
+    calc_anoms=1, detrend=1, method='closest 8'):
 
         super(proxy, self).__init__()
         if lon < 0:
@@ -373,7 +373,6 @@ class proxy:
         sub, bins = pd.qcut(ts.iloc[:,0], 5, labels=labels, retbins=True)
 
         ts.loc[:,'cat'] = sub
-
         # if the flag qualitative is set to True (default is false)
         # then we search the years corresponding to the category
         if self.qualitative:
