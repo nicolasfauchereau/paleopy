@@ -86,7 +86,7 @@ if verbose:
     save_progress(opath, 'HGT 1000 NZ', 20)
 
 hgt_1000 = analogs(ens, 'ncep', 'hgt_1000').composite()
-f = scalar_plot(hgt_1000, test=0.1, domain=[165, 180, -50., -30], proj='cyl', res='h', vmin=-40.0, vmax=40.0).plot()
+f = scalar_plot(hgt_1000, test=0.1, domain=[165, 180, -50., -30], proj='cyl', res='h', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath, 'hgt_1000_NZ.png'))
 plt.close(f)
 images.append(
@@ -95,7 +95,7 @@ images.append(
 if verbose:
     save_progress(opath, 'HGT 1000 SH', 23)
 
-f = scalar_plot(hgt_1000, test=0.1, proj='spstere', res='i', vmin=-40.0, vmax=40.0).plot()
+f = scalar_plot(hgt_1000, test=0.1, proj='spstere', res='i', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath, 'hgt_1000_SH.png'))
 images.append({'id': 'NCEP_SH_map_ensemble', 'title': 'Southern Hemisphere ensemble map for z1000',
                'filename': 'hgt_1000_SH.png'})
@@ -104,7 +104,7 @@ plt.close(f)
 if verbose:
     save_progress(opath, 'HGT 1000 SP', 26)
 
-f = scalar_plot(hgt_1000, test=0.1, domain=[135, 290, -50., 10], proj='cyl', res='i', vmin=-40.0, vmax=40.0).plot()
+f = scalar_plot(hgt_1000, test=0.1, domain=[135, 290, -50., 10], proj='cyl', res='i', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath, 'hgt_1000_SP.png'))
 images.append(
     {'id': 'NCEP_SP_map_ensemble', 'title': 'Southwest Pacific ensemble map for z1000', 'filename': 'hgt_1000_SP.png'})

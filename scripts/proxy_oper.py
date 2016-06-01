@@ -217,7 +217,7 @@ HGT at 1000 hPa, global
 if verbose:
     save_progress(opath, 'HGT at 1000 hPa', 32)
 hgt = analogs(p, 'ncep', 'hgt_1000').composite()
-f = scalar_plot(hgt, test=0.05, proj='cyl', vmin=-40.0, vmax=40.0).plot()
+f = scalar_plot(hgt, test=0.05, proj='cyl', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath,'hgt_1000_proxy.png'))
 images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'hgt_1000_proxy.png'})
 plt.close(f)
@@ -228,7 +228,7 @@ HGT at 1000 hPa, polar
 if verbose:
     save_progress(opath, 'HGT at 1000 hPa', 34)
 hgt = analogs(p, 'ncep', 'hgt_1000').composite()
-f = scalar_plot(hgt, test=0.05, proj='spstere', vmin=-40.0, vmax=40.0).plot()
+f = scalar_plot(hgt, test=0.05, proj='spstere', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath,'hgt_1000_proxy_polar.png'))
 images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'hgt_1000_proxy_polar.png'})
 plt.close(f)
@@ -239,7 +239,7 @@ HGT at 1000 hPa, NZ domain, composite
 
 if verbose:
     save_progress(opath, 'HGT 1000 global', 36)
-f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h', vmin=-40.0, vmax=40.0).plot(subplots=False)
+f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h', vmin=-25.0, vmax=25.0).plot(subplots=False)
 f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ.png'))
 images.append({'id': 'hgt_1000_NZ', 'title' : 'Geopotential at 1000 hPa, NZ domain', 'filename': 'hgt_1000_proxy_NZ.png'})
 plt.close(f)
@@ -249,7 +249,7 @@ HGT at 1000 hPa, NZ domain, one map per year
 """
 if verbose:
     save_progress(opath, 'HGT 1000 NZ domain analogs', 38)
-f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h', vmin=-40.0, vmax=40.0).plot(subplots=True)
+f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h', vmin=-25.0, vmax=25.0).plot(subplots=True)
 f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ_years.png'))
 images.append({'id': 'hgt_1000_NZ_samples', 'title' : 'Geopotential at 1000 hPa, NZ domain, analog years', 'filename': 'hgt_1000_proxy_NZ_years.png'})
 plt.close(f)
