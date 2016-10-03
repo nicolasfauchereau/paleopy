@@ -121,7 +121,7 @@ class analogs:
             self.dset['dates'] = (('dates',), dates)
             self.dset['seas_var'] = (('dates', 'latitudes', 'longitudes'), seas_field)
 
-    def composite(self, climatology=(1981, 2010),  test=True, repeats=True, weighting=False):
+    def composite(self, climatology=(1981, 2010),  test=True, repeats=True, weighting=True):
         """
         calculates the composite anomalies (and the Student t-test)
         from the seasonal values
