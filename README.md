@@ -145,3 +145,5 @@ illustrates the reconstruction of Weather Regimes (WR) frequency anomalies from 
 + [**`indices.ipynb`**](https://github.com/nicolasfauchereau/paleopy/blob/master/notebooks/indices.ipynb)
 illustrates the reconstruction of anomalies for
 a set of climate indices (currently the SOI, NINO 3.4 SSTs, the SAM index and the IOD index)
+
+hi there 
