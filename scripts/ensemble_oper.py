@@ -110,6 +110,15 @@ images.append(
     {'id': 'NCEP_SP_map_ensemble', 'title': 'Southwest Pacific ensemble map for z1000', 'filename': 'hgt_1000_SP.png'})
 plt.close(f)
 
+# plots the vector wind on top of the HGT1000
+
+uwnd_1000 = analogs(ens, 'ncep', 'uwnd_1000').composite()
+vwnd_1000 = analogs(ens, 'ncep', 'vwnd_1000').composite()
+
+f = vector_plot(uwnd_1000, vwnd_1000, hgt_1000, ....).plot()
+
+
+
 # ==============================================================================
 """
 SST

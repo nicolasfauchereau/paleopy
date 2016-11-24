@@ -6,14 +6,32 @@ from mpl_toolkits.basemap import addcyclic
 import palettable
 
 class vector_plot:
-    def __init__(self, ucompos, vcompos):
+    """
+    plots vector plots (uwnd + vwnd) on top of geopotential anomalies (ht)
+
+    Parameters
+    ----------
+
+    ucompos : object, composite anomalies and metadata for zonal wind component
+            a composite object coming from e.g. `uwnd_1000 = analogs(ens, 'ncep', 'uwnd_1000').composite()`
+
+    vcompos : object, composite anomalies and metadata for meridional wind component
+            a composite object coming from e.g. `vwnd_1000 = analogs(ens, 'ncep', 'vwnd_1000').composite()`
+
+    hgtcompos : object, composite anomalies and metadata for HGT
+            a composite object coming from e.g. `hgt_1000 = analogs(ens, 'ncep', 'hgt_1000').composite()`
+
+    """
+    def __init__(self, ucompos, vcompos, hgtcompos):
         self.ucompos = ucompos
         self.vcompos = vcompos
+        self.hgtcompos = hgtcompos
 
         self.uanoms  = self.ucompos.dset['composite_anomalies']
         self.vanoms  = self.vcompos.dset['composite_anomalies']
+        self.hanoms  = self.hgtcompos.dset['composite_anomalies']
 
-        self.windspeed = np.sqrt(np.power(self.uanoms, 2) + np.power(self.vanoms, 2))
+        #self.windspeed = np.sqrt(np.power(self.uanoms, 2) + np.power(self.vanoms, 2))
 
     def plotmap(self, domain = [0., 360., -90., 90.], res='c', stepp=2, scale=20):
 

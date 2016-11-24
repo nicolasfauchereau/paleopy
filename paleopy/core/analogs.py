@@ -30,7 +30,8 @@ class analogs:
         # self.weights = self.parent.weights
         self.detrend = self.parent.detrend
         # wet get the location(s) (lon, lat) of the proxy
-        # or ensemble of proxies here
+        # or ensemble of proxies here, in case it / they need to be plotted against the
+        # anomalies
         self.locations = {}
         if self.parent.description == 'proxy':
             self.locations[self.parent.sitename] = self.parent.extracted_coords
@@ -38,7 +39,7 @@ class analogs:
             for k in self.parent.dict_proxies.keys():
                 self.locations[k] = self.parent.dict_proxies[k]['extracted_coords']
 
-    def _read_dset_params(self):
+    def __read_dset_params(self):
         """
         reads in the Dataset parameters
         """
@@ -47,9 +48,9 @@ class analogs:
         # dset_dict is a dictionnary holding useful metadata
         self.dset_dict = dset_dict[self.dataset][self.variable]
 
-    def _check_domain(self, domain):
+    def __check_domain(self, domain):
         if not(hasattr(self, 'dset_dict')):
-            self._read_dset_params()
+            self.__read_dset_params()
         self.domain = domain
         domain_dset = self.dset_dict['domain']
         if ( (self.domain[0] < domain_dset[0]) | (self.domain[1] > domain_dset[1])  \
@@ -61,10 +62,10 @@ class analogs:
         """
         calculates the season
         """
-        self.seasons_params = seasons_params()
+        seasons_params = seasons_params()
 
         if not(hasattr(self, 'dset_dict')):
-            self._read_dset_params()
+            self.__read_dset_params()
 
         # get the name of the file to open
         fname = self.dset_dict['path']

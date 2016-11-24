@@ -294,7 +294,7 @@ class proxy:
         # seasons parameters is a dictionnary with:
         # key = the season string ('DJF', 'JJA')
         # value =  a tuple (length of the season, month of the end of the season)
-        self.seasons_params = seasons_params()
+        seasons_params = seasons_params()
 
         if not(hasattr(self, 'ts')):
             self.extract_ts()
@@ -303,17 +303,17 @@ class proxy:
         if self.dset_dict['units'] in ['mm']:
             # test which version of pandas we are using
             if pd.__version__ >= '0.18':
-                ts_seas = self.ts.rolling(window=self.seasons_params[season][0]).sum()
+                ts_seas = self.ts.rolling(window=seasons_params[season][0]).sum()
             else:
-                ts_seas = pd.rolling_sum(self.ts, self.seasons_params[season][0])
+                ts_seas = pd.rolling_sum(self.ts, seasons_params[season][0])
         # else we calculate the rolling mean (average)
         else:
             if pd.__version__ >= '0.18':
-                ts_seas = self.ts.rolling(window=self.seasons_params[season][0]).mean()
+                ts_seas = self.ts.rolling(window=seasons_params[season][0]).mean()
             else:
-                ts_seas = pd.rolling_mean(self.ts, self.seasons_params[season][0])
+                ts_seas = pd.rolling_mean(self.ts, seasons_params[season][0])
 
-        ts_seas = ts_seas[ts_seas.index.month == self.seasons_params[season][1]]
+        ts_seas = ts_seas[ts_seas.index.month == seasons_params[season][1]]
 
         # drop the missing values coming from the rolling average
         ts_seas.dropna(inplace=True)
