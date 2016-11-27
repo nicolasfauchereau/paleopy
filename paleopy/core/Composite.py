@@ -206,6 +206,10 @@ class Composite:
         return dset
 
     def composite(self):
+        """
+        this method calculates the composite anomalies themselves, in a way that
+        depends on the consistency of the proxy definitions
+        """
         if (self.parent.description == 'ensemble') and self.parent.proxies_consistent == 1:
             compos = self.__composite()
 
