@@ -27,7 +27,7 @@ from ..utils import seasons_params
 import warnings
 warnings.filterwarnings(action='ignore', category=FutureWarning)
 
-class proxy:
+class Proxy:
     """
     base class for a single proxy
 
@@ -161,7 +161,6 @@ class proxy:
     qualitative=0, period="1979-2014", climatology="1981-2010", \
     calc_anoms=1, detrend=1, method='closest 8'):
 
-        super(proxy, self).__init__()
         if lon < 0:
             lon += 360.
         self.description = 'proxy'
@@ -188,7 +187,7 @@ class proxy:
         self.detrend = bool(detrend)
         self.method = method
 
-    def read_dset_params(self):
+    def __read_dset_params(self):
         """
         reads the `datasets.json` file and loads the dictionnary
         containing all the parameters for this dataset
@@ -197,14 +196,14 @@ class proxy:
             dset_dict = json.loads(f.read())
         self.dset_dict = dset_dict[self.dataset][self.variable]
 
-    def check_domain(self):
+    def __check_domain(self):
         """
         checks if the domain that is passed
         is compatible with the domain of the
         dataset
         """
         if not(hasattr(self, 'dset_dict')):
-            self.read_dset_params()
+            self.__read_dset_params()
         domain = self.dset_dict['domain']
         lond = self.coords[0]
         latd = self.coords[1]
@@ -220,7 +219,7 @@ class proxy:
             """.format(self.dataset))
             raise Exception("DOMAIN ERROR")
 
-    def _calc_weights(self, df):
+    def __calc_weights(self, df):
         """
         calculate the weights for compositing
         """
@@ -239,7 +238,7 @@ class proxy:
         the passed proxy coordinates
         """
         # checks the domain first
-        self.check_domain()
+        self.__check_domain()
         # if all good, we proceed
         fname = self.dset_dict['path']
         point = self.coords
@@ -294,7 +293,7 @@ class proxy:
         # seasons parameters is a dictionnary with:
         # key = the season string ('DJF', 'JJA')
         # value =  a tuple (length of the season, month of the end of the season)
-        seasons_params = seasons_params()
+        seasons_parameters = seasons_params()
 
         if not(hasattr(self, 'ts')):
             self.extract_ts()
@@ -303,17 +302,17 @@ class proxy:
         if self.dset_dict['units'] in ['mm']:
             # test which version of pandas we are using
             if pd.__version__ >= '0.18':
-                ts_seas = self.ts.rolling(window=seasons_params[season][0]).sum()
+                ts_seas = self.ts.rolling(window=seasons_parameters[season][0]).sum()
             else:
-                ts_seas = pd.rolling_sum(self.ts, seasons_params[season][0])
+                ts_seas = pd.rolling_sum(self.ts, seasons_parameters[season][0])
         # else we calculate the rolling mean (average)
         else:
             if pd.__version__ >= '0.18':
-                ts_seas = self.ts.rolling(window=seasons_params[season][0]).mean()
+                ts_seas = self.ts.rolling(window=seasons_parameters[season][0]).mean()
             else:
-                ts_seas = pd.rolling_mean(self.ts, seasons_params[season][0])
+                ts_seas = pd.rolling_mean(self.ts, seasons_parameters[season][0])
 
-        ts_seas = ts_seas[ts_seas.index.month == seasons_params[season][1]]
+        ts_seas = ts_seas[ts_seas.index.month == seasons_parameters[season][1]]
 
         # drop the missing values coming from the rolling average
         ts_seas.dropna(inplace=True)
@@ -396,16 +395,25 @@ class proxy:
                 self.category = category
                 tmp_df = subset.copy(deep=True)
                 # calculates the weights (add to 1)
-                self.analogs = self._calc_weights(tmp_df)
+                self.analogs = self.__calc_weights(tmp_df)
                 self.quintiles = bins
             elif self.method == "closest 8":
                 sub = (abs(self.value - ts.iloc[:,0])).sort_values()[:8].index
                 tmp_df = ts.loc[sub,:].copy(deep=True)
                 # calculates the weights (add to 1)
-                self.analogs = self._calc_weights(tmp_df)
+                self.analogs = self.__calc_weights(tmp_df)
                 self.category = self.analogs.loc[:,'cat'].values
             self.weights = self.analogs.loc[:,'weights'].values
         self.analog_years = self.analogs.index.year
+
+    def __repr__(self):
+        """
+        the internal representation of an Ensemble object when called interactively
+        """
+        return """
+        Ensemble made of {0} proxies
+        ------------------
+        proxies sitenames:\n{1:<10}""".format(len(self.df_proxies), "\n".join(self.df_proxies.sort_index().index.tolist()))
 
     def proxy_repr(self, pprint=False, outfile=True):
         """
