@@ -165,7 +165,7 @@ class Analogs:
 
         # get the composite anomalies into a DataArray
         compos_a_x = xray.DataArray(ma.masked_array(compos_a, np.isnan(compos_a)), dims=('years','latitudes','longitudes'),
-                              coords={'years':ayears, 'latitudes':self.dset.latitudes, 'longitudes':self.dset.longitudes})
+                              coords={'years':self.analog_years, 'latitudes':self.dset.latitudes, 'longitudes':self.dset.longitudes})
         # if test is True, then the standard Student t-test is calculated
         if test:
             t, pvalues = ttest_ind(compos_s.data, clim.data, axis=0)
@@ -185,7 +185,8 @@ class Analogs:
 
         dset['composite_anomalies'] = compos_a_x.mean('years')
 
-        dset['weights'] = xray.DataArray(np.array(self.parent.weights), dims=('years'), coords={'years':compos_a_x.years.data})
+        if weighting:
+            dset['weights'] = xray.DataArray(np.array(self.parent.weights), dims=('years'), coords={'years':compos_a_x.years.data})
 
         # saves the p-values
         dset['pvalues'] = (('latitudes', 'longitudes'), pvalues)
