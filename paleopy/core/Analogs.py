@@ -7,11 +7,10 @@ import bottleneck  as bn
 from matplotlib.mlab import detrend_linear
 from scipy.stats import ttest_ind
 from ..utils import seasons_params
-# from utils import seasons_params
 
-class Composite:
+class Analogs:
     """
-    base class for analogs composite calculations,
+    base class for analogs calculations,
     takes either a `proxy` or `ensemble` instance
     """
     def __init__(self, obj, dataset, variable):
@@ -51,7 +50,7 @@ class Composite:
         """
         calculates the season
         """
-        seasons_params = seasons_params()
+        seasons_parameters = seasons_params()
 
         if not(hasattr(self, 'dset_dict')):
             self._read_dset_params()
@@ -68,19 +67,19 @@ class Composite:
 
         # if the variable is rainfall, we calculate the running SUM
         if self.dset_dict['units'] in ['mm']:
-            seas_field = bn.move_sum(m_var, seasons_params[self.season][0], \
-                                          min_count=seasons_params[self.season][0], axis=0)
+            seas_field = bn.move_sum(m_var, seasons_parameters[self.season][0], \
+                                          min_count=seasons_parameters[self.season][0], axis=0)
         # if not, then we calculate the running MEAN (average)
         else:
-            seas_field = bn.move_mean(m_var, self.seasons_params[self.season][0], \
-                                          min_count=self.seasons_params[self.season][0], axis=0)
+            seas_field = bn.move_mean(m_var, seasons_parameters[self.season][0], \
+                                          min_count=seasons_parameters[self.season][0], axis=0)
 
         # get rid of the first nans in the time-series / fields after move_mean or move_sum
-        seas_field = seas_field[(self.seasons_params[self.season][0]-1)::,:,:]
-        index = index[(self.seasons_params[self.season][0]-1)::]
+        seas_field = seas_field[(seasons_parameters[self.season][0]-1)::,:,:]
+        index = index[(seasons_parameters[self.season][0]-1)::]
 
         # now selects the SEASON of interest
-        iseas = np.where(index.month == self.seasons_params[self.season][1])[0]
+        iseas = np.where(index.month == seasons_parameters[self.season][1])[0]
         dates = index[iseas]
         seas_field = np.take(seas_field, iseas, axis=0)
 
@@ -111,7 +110,7 @@ class Composite:
             self.dset['dates'] = (('dates',), dates)
             self.dset['seas_var'] = (('dates', 'latitudes', 'longitudes'), seas_field)
 
-    def _composite(self, climatology=(1981, 2010),  test=True, repeats=True, weighting=True):
+    def _composite(self, climatology=(1981, 2010),  test=True, repeats=True, weighting=False):
         """
         calculates the composite anomalies (and the Student t-test)
         from the seasonal values
@@ -149,8 +148,8 @@ class Composite:
 
 
         # calculating the climatology
-        clim = self.dset['seas_var'].sel(dates=slice(str(self.climatology[0]), \
-                                                     str(self.climatology[1])))
+        clim = self.dset['seas_var'].sel(dates=slice(str(climatology[0]), \
+                                                     str(climatology[1])))
 
         # calculate the anomalies WRT the climatology
         compos_a = compos_s - clim.mean('dates')
@@ -206,38 +205,24 @@ class Composite:
         return dset
 
     def composite(self):
-        """
-        calculates the composites, call the private method `__composite`
-        """
-
-        """
-        first case, the parent object is a proxy
-        """
         if self.parent.description == 'proxy':
-            self.compos = self._composite()
+            self.dset = self._composite()
 
-        # """
-        # second case: the parent object is an `ensemble`, and the proxies are consistent
-        # """
-        # elif (self.parent.description == 'ensemble') and (self.parent.is_consistent == 1):
-        #     self.compos = self._composite()
-        #
-        # """
-        # third case: the parent object is an `ensemble`, BUT the proxies are NOT consistent
-        # """
-        # else (self.parent.description == 'ensemble') and self.parent.is_consistent == 0:
-        #     self.compos = None
-        #     pass
-        # compos = []
-        # for k in self.parent.dict_proxies.keys():
-        #     p = self.parent.dict_proxies[k]
-        #     self.calcul
-        #     compos = self.__composite()
+        if (self.parent.description == 'ensemble') and self.parent.proxies_consistent == 1:
+            self.dset  = self._composite()
+
+        elif (self.parent.description == 'ensemble') and self.parent.proxies_consistent == 0:
+            # compos = []
+            # for k in self.parent.dict_proxies.keys():
+            #     p = self.parent.dict_proxies[k]
+            #     self.
+            #     compos = self.__composite()
+            pass
 
     def save_to_file(self, fname=None):
         nc = self.dset[['composite_sample','composite_anomalies', 'pvalues']]
         nc = nc.to_netcdf(fname)
-        self.dset.close()
+        nc.close()
 
     def close(self):
         self.dset.close()

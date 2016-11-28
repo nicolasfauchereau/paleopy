@@ -410,10 +410,7 @@ class Proxy:
         """
         the internal representation of an Ensemble object when called interactively
         """
-        return """
-        Ensemble made of {0} proxies
-        ------------------
-        proxies sitenames:\n{1:<10}""".format(len(self.df_proxies), "\n".join(self.df_proxies.sort_index().index.tolist()))
+        return "this should be the internal representation of the proxy"
 
     def proxy_repr(self, pprint=False, outfile=True):
         """
