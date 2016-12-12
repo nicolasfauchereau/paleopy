@@ -55,7 +55,7 @@ class Ensemble:
             with open(json_file, 'r') as f:
                 # d is the full dictionnary with all the metadata
                 d = json.loads(f.read())
-                self.analog_years.extend(d['analog_years'])
+                self.analog_years.append(d['analog_years'])
                 # disable the weights temporarily
                 # self.weights.extend(d['weights'])
                 self.detrend.append(d['detrend'])
