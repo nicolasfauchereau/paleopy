@@ -15,7 +15,9 @@ class Analogs:
     takes either a `proxy` or `ensemble` instance
     """
     def __init__(self, obj, dataset, variable):
-        # the parent can be either an instance of a `proxy` or `ensemble` class
+        # the parent can be either an instance of a `proxy` or `ensemble` calculate_season
+        # `_dset_dict` is set to None, defined later
+        self._dset_dict = None
         self.parent = obj
         # the dataset to read from
         self.dataset = dataset
@@ -39,23 +41,13 @@ class Analogs:
             for k in self.parent.dict_proxies.keys():
                 self.locations[k] = self.parent.dict_proxies[k]['extracted_coords']
 
-    # todo: use the @property decorator on that one, because it is just an attribute
-
-    def __read_dset_params(self):
-        """
-        reads in the Dataset parameters
-        """
-        with open(os.path.join(self.parent.djsons, 'datasets.json'), 'r') as f:
-            dset_dict = json.loads(f.read())
-        # dset_dict is a dictionnary holding useful metadata
-        self.dset_dict = dset_dict[self.dataset][self.variable]
-
-    # @property
-    # def dset_dict(self):
-    #     """reads in the Dataset parameters."""
-    #     with open(os.path.join(self.parent.djsons, 'datasets.json'), 'r') as f:
-    #         _dset_dict = json.loads(f.read())
-    #     return self._dset_dict
+    # use the @property decorator on that one, because `dset_dict` is just an attribute
+    @property
+    def dset_dict(self):
+        if self._dset_dict is None:
+            with open(os.path.join(self.parent.djsons, 'datasets.json'), 'r') as f:
+                _dset_dict = json.loads(f.read())
+            return _dset_dict[self.dataset][self.variable]
 
     def __calculate_season(self, season):
         """
@@ -67,8 +59,8 @@ class Analogs:
         """
         seasons_parameters = seasons_params()
 
-        if not(hasattr(self, 'dset_dict')):
-            self.__read_dset_params()
+        # if not(hasattr(self, 'dset_dict')):
+        #     self.__read_dset_params()
 
         # `dset` is now an attribute of the ensemble object
         self.dset = xray.open_dataset(self.dset_dict['path'])
@@ -116,11 +108,10 @@ class Analogs:
         """
         calculate the composite values for the dataset and variable passed as
         arguments of 'Analogs' for ONE proxy or ONE ensemble constituted from
-        consistent proxies ...
+        CONSISTENT proxies ...
         """
 
-        if not(hasattr(self, 'dset_compos_dict')):
-            dset_compos = self.__calculate_season(season)
+        dset_compos = self.__calculate_season(season)
 
         """
         first step, detrend if set to True
@@ -155,6 +146,7 @@ class Analogs:
             #         for ilon in range(dseas_field.shape[2]):
             #             dseas_field[:,ilat, ilon] = detrend_linear(seas_field[:,ilat,ilon]) \
             #             + seas_field[:,ilat,ilon].mean()
+
             """
             over_write the variable `seas_var` in `dset_compos_dict` with the detrended version
             """
@@ -267,6 +259,10 @@ class Analogs:
             detrend = self.detrend
             climatology = self.parent.climatology
 
+            """
+            the ensemble can then be treated as ONE proxy ...
+            """
+
             dset_compos = self.__process_one(analog_years,\
             season,\
             detrend = detrend,\
@@ -279,7 +275,7 @@ class Analogs:
 
         """
         3rd case: the ensemble of proxies is inconsistent: i.e. the sensitive season
-        are NOT the same among proxies, and all proxies do NOT share the same detrend attribute and climatologies
+        are NOT the same among proxies, or all proxies do NOT share the same detrend attribute and climatologies
 
         Note that the length of e.g. the list of analog years do NOT need to be the same
         """
@@ -292,7 +288,7 @@ class Analogs:
             ensemble_length = len(self.parent.df_proxies)
 
             if any( [ensemble_length != len(self.analog_years), ensemble_length != len(self.parent.weights), ensemble_length != len(self.parent.climatology), ensemble_length != len(self.detrend)] ):
-                print("the length of the ensemble {} is inconsistent with the length of one of the lists (analog_years, detrend, climatology, weights)".format(ensemble_length))
+                print("the length of the ensemble ({}) is inconsistent with the length of one of the lists (analog_years, detrend, climatology, weights)".format(ensemble_length))
             else:
                 l_dset_compos = []
                 for i in range(ensemble_length):
@@ -303,6 +299,8 @@ class Analogs:
                     weights = self.parent.weights[i]
                     dset_compos = self.__process_one(years, season, climatology=climatology, detrend=detrend, weights=weights, weighting=weighting)
                     l_dset_compos.append(dset_compos)
+
+                dset_compos = xray.concat(l_dset_compos, dim='proxy')
 
                 # concatenate the datasets along a 'proxy' dimension
                 self.dset_compos = xray.concat(l_dset_compos, dim='proxy')
@@ -315,3 +313,4 @@ class Analogs:
 
     def close(self):
         self.dset.close()
+        self.dset_compos.close()

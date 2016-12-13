@@ -53,10 +53,15 @@ class Ensemble:
         self.dict_proxies = od()
         for json_file in lfiles:
             with open(json_file, 'r') as f:
-                # d is the full dictionnary with all the metadata
+                # d is the full dictionnary with all the metadata for a proxy
                 d = json.loads(f.read())
                 self.analog_years.append(d['analog_years'])
-                self.weights.append(d['weights'])
+                # is there are NOT weights for the proxy, we create some
+                # assuming every year is weighted the same (1. everywhere)
+                if 'weights' in d:
+                    self.weights.append(d['weights'])
+                else:
+                    self.weights.append([1.] * len(d['analog_years']))
                 self.detrend.append(d['detrend'])
                 self.season.append(d['season'])
                 self.climatology.append(tuple(d['climatology']))
