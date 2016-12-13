@@ -67,8 +67,8 @@ class Analogs:
         """
         seasons_parameters = seasons_params()
 
-        # if not(hasattr(self, 'dset_dict')):
-        #     self.__read_dset_params()
+        if not(hasattr(self, 'dset_dict')):
+            self.__read_dset_params()
 
         # `dset` is now an attribute of the ensemble object
         self.dset = xray.open_dataset(self.dset_dict['path'])
