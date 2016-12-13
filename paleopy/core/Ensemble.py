@@ -56,8 +56,7 @@ class Ensemble:
                 # d is the full dictionnary with all the metadata
                 d = json.loads(f.read())
                 self.analog_years.append(d['analog_years'])
-                # disable the weights temporarily
-                # self.weights.extend(d['weights'])
+                self.weights.append(d['weights'])
                 self.detrend.append(d['detrend'])
                 self.season.append(d['season'])
                 self.climatology.append(tuple(d['climatology']))
