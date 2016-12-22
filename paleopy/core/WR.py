@@ -34,21 +34,21 @@ class WR:
         if self.parent.description == 'proxy':
             self.sitename = self.parent.sitename
 
-    def _get_WR_json(self):
+    def __get_WR_json(self):
         with open(os.path.join(self.djsons, 'WRs.json'), 'r') as f:
             dict_json = json.loads(f.read())
         return dict_json
 
-    def _get_WR_ts(self):
+    def __get_WR_ts(self):
         if not(hasattr(self, 'dict_json')):
-            self.dict_json = self._get_WR_json()
+            self.dict_json = self.__get_WR_json()
         csv = self.dict_json[self.classification]['WR_TS']
         wr_ts = pd.read_csv(csv, parse_dates=True, index_col=0)
         return wr_ts
 
-    def _get_WR_MC(self):
+    def __get_WR_MC(self):
         if not(hasattr(self, 'dict_json')):
-            self.dict_json = self._get_WR_json()
+            self.dict_json = self.__get_WR_json()
         f = h5py.File(self.dict_json[self.classification]['Markov Chains'], mode='r')
         MC_probs = f[self.season]['probs'].value
         MC_probs_classes = f[self.season]['probs'].attrs['classes']
@@ -62,9 +62,9 @@ class WR:
         # of each type in the 1000 simulations
         return MC_probs
 
-    def _get_season_ts(self):
+    def __get_season_ts(self):
         if not(hasattr(self,'wr_ts')):
-            wr_ts = self._get_WR_ts()
+            wr_ts = self.__get_WR_ts()
         ts = wr_ts.copy()
         ts.loc[:,'month'] = ts.index.month
 
@@ -78,9 +78,9 @@ class WR:
 
         return ts_seas
 
-    def _get_clim_probs(self):
+    def __get_clim_probs(self):
         if not(hasattr(self, 'ts_seas')):
-            ts_seas = self._get_season_ts()
+            ts_seas = self.__get_season_ts()
         ts = ts_seas.ix[str(self.climatology[0]): str(self.climatology[1])].copy()
         types = self.dict_json[self.classification]['types']
         clim_probs = get_probs(ts['type'], types)
@@ -88,7 +88,7 @@ class WR:
         clim_probs = pd.Series(clim_probs, index=types)
         return clim_probs
 
-    def _get_compos_probs(self, analog_years):
+    def __get_compos_probs(self, analog_years):
         """
         Arguments
         ---------
@@ -103,7 +103,7 @@ class WR:
                     observed probabilities
         """
         if not(hasattr(self, 'ts_seas')):
-            ts_seas = self._get_season_ts()
+            ts_seas = self.__get_season_ts()
         ayears = list(map(str, analog_years))
         ts = ts_seas.copy()
         ts = pd.concat([ts.ix[l] for l in ayears])
@@ -133,10 +133,10 @@ class WR:
         """
 
         # get the climatological probabilities, those are always the same
-        clim_probs = self._get_clim_probs()
+        clim_probs = self.__get_clim_probs()
 
         if kind == 'one':
-            obs_probs = self._get_compos_probs(self.analog_years)
+            obs_probs = self.__get_compos_probs(self.analog_years)
             anoms = obs_probs - clim_probs
             if self.parent.description == 'proxy':
                 self.df_anoms = pd.DataFrame(anoms, columns=[self.sitename])
@@ -147,7 +147,7 @@ class WR:
             # if test, the percentiles values are added as columns to
             # the df_probs pandas.DataFrame
             if test:
-                MC_probs = self._get_WR_MC()
+                MC_probs = self.__get_WR_MC()
                 for tval in [0.1, 0.9, 0.05, 0.95, 0.01, 0.99]:
                     c = str(int(tval * 100))
                     self.df_probs.loc[:,c] = MC_probs.T.quantile(tval)
@@ -171,7 +171,7 @@ class WR:
                 d_probs = {}
                 d = self.parent.dict_proxies
                 for k in d.keys():
-                    obs_probs = self._get_compos_probs(analog_years = d[k]['analog_years'])
+                    obs_probs = self.__get_compos_probs(analog_years = d[k]['analog_years'])
                     d_anoms[k] = obs_probs - clim_probs
                     d_probs[k] = obs_probs
                 # df_probs contains the ANOMALIES in frequencies (probabilities)
@@ -187,7 +187,7 @@ class WR:
             # if test, we add another DataFrame to the object, containing the
             # percentile values coming from the MC simulation
             if test:
-                MC_probs = self._get_WR_MC()
+                MC_probs = self.__get_WR_MC()
                 df_probs_MC = pd.DataFrame()
                 for tval in [0.1, 0.9, 0.05, 0.95, 0.01, 0.99]:
                     c = str(int(tval * 100))

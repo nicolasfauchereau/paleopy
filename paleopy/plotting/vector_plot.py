@@ -1,9 +1,9 @@
 import numpy as np
-from numpy import ma
 from matplotlib import pyplot as plt
 from mpl_toolkits.basemap import Basemap as bm
 from mpl_toolkits.basemap import addcyclic, shiftgrid
 import palettable
+from scipy.stats import scoreatpercentile
 
 class vector_plot:
     """
@@ -24,15 +24,22 @@ class vector_plot:
     """
     def __init__(self, ucompos, vcompos, hgtcompos):
         
+        """
+        these are the composite objects
+        """
         self.hgtcompos = hgtcompos
         self.ucompos = ucompos
         self.vcompos = vcompos
-        self.uanoms  = ucompos.dset_compos['composite_anomalies']
-        self.vanoms  = vcompos.dset_compos['composite_anomalies']
-        self.hanoms  = hgtcompos.dset_compos['composite_anomalies'] 
-        self.windspeed = np.sqrt(self.uanoms**2 + self.vanoms**2)
+        
+        """
+        these are the datasets containing the composite anomalies and tests
+        """      
+        self.windspeed_dset = (self.ucompos.dset_compos ** 2 + self.vcompos.dset_compos ** 2).apply(np.sqrt)
+        self.uwnd_dset  = ucompos.dset_compos
+        self.vwnd_dset  = vcompos.dset_compos
+        self.hgt_dset  = hgtcompos.dset_compos
 
-    def __get_levels(self, data):
+    def _get_levels(self, data):
         """
         data can be either the data array attached to:
 
@@ -73,28 +80,43 @@ class vector_plot:
             poslevels = levels[levels > 0 ]
             levels = [neglevels,poslevels]
             # get the colormap defined in the dset_dict for HGT
-            cmap = eval(hgtcompos.dset_dict['plot']['cmap'])
+            cmap = eval(self.hgtcompos.dset_dict['plot']['cmap'])
         else:
             # get the default matplotlib colormap
             cmap = plt.get_cmap()
 
         return vmin, vmax, levels, cmap
     
-    def plot(self, domain = [0., 360., -90., 90.], res='c', stepp=1, scale=8):
+    def plot(self, domain = None, res='c', stepp=1, scale=8, test=0.1):
         
-        latrev = (self.windspeed.latitudes[-1] < self.windspeed.latitudes[0])
+        """
+        if the domain is actually defined, we select in lat and lon, making sure the 
+        latitudes are increasing (from South to North)
+        """
         
-        if latrev: 
-            ugrid = self.uanoms.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
-            vgrid = self.vanoms.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
-            hgrid = self.hanoms.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
-            wgrid = self.windspeed.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
+        if domain is not None: 
+        
+            latrev = (self.windspeed.latitudes[-1] < self.windspeed.latitudes[0])
+
+            if latrev: 
+                ugrid = self.uwnd_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
+                vgrid = self.vwnd_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
+                hgrid = self.hgt_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
+                wgrid = self.windspeed_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[3],domain[2]))
+            else: 
+                ugrid = self.uwnd_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
+                vgrid = self.vwnd_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
+                hgrid = self.hgt_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
+                wgrid = self.windspeed_dset.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
+        
         else: 
-            ugrid = self.uanoms.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
-            vgrid = self.vanoms.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
-            hgrid = self.hanoms.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))
-            wgrid = self.windspeed.sel(longitudes=slice(domain[0],domain[1]), latitudes=slice(domain[2],domain[3]))           
-                
+            
+            ugrid = self.uwnd_dset
+            vgrid = self.vwnd_dset
+            hgrid = self.hgt_dset
+            wgrid = self.windspeed_dset
+            
+        
         latitudes = wgrid.latitudes.data
         longitudes = wgrid.longitudes.data
 
@@ -107,51 +129,53 @@ class vector_plot:
         # this colormap is quite good for wind speed
         # cmap = palettable.colorbrewer.sequential.Oranges_9.mpl_colormap
         
-        # this one is the one used for HGT
-#         cmap = palettable.colorbrewer.diverging.RdYlBu_11_r.mpl_colormap
-        cmap = eval(hgtcompos.dset_dict['plot']['cmap'])
-        
-        
+
         """
         get the width and height of the figure
         """
         
         w = 10 
         
-        h = np.ceil( (wgrid.shape[0] / wgrid.shape[1]) *  10 ) 
+        h = np.ceil( (wgrid['composite_anomalies'].shape[0] / wgrid['composite_anomalies'].shape[1]) *  10 ) 
         
         f, ax = plt.subplots(figsize=(w,h))
 
         m.ax = ax
         
+        m.drawmeridians(np.arange(0., 360. + 60, 60.), labels=[0,0,0,1], color='0.4', linewidth=0.5)
+        m.drawparallels(np.arange(-80., 80. + 40., 40.), labels=[1,0,0,0], color='0.4', linewidth=0.5)
+        
         """
         get the min, max, levels (for contours) and colormap
         """
 
-        vmin, vmax, levels, cmap = self.__get_levels(hgrid.data)
+        vmin, vmax, levels, cmap = self._get_levels(hgrid['composite_anomalies'].data)
 
         """
         plot using pcolormesh 
         """
         
-        im = m.pcolormesh(lons, lats, hgrid.data, cmap=cmap)
+        im = m.pcolormesh(lons, lats, hgrid['composite_anomalies'].data, cmap=cmap, vmin=vmin, vmax=vmax)
         
         cb = m.colorbar(im)
 
-        cb.set_label('HG (m/s)', fontsize=14)
+        cb.set_label("{}, {}".format(self.hgtcompos.dset_dict['short_description'], self.hgtcompos.dset_dict['units']), fontsize=14)
 
+        ax.set_title("geopotential at 850 hPa \n{} and {}".format(self.ucompos.dset_dict['description'], \
+                                                     self.vcompos.dset_dict['description']), fontsize=14)
+        
         """
-        plots the contours for HGT 
+        plots the contours for HGT: not needed anymore
         """
         
-        if len(levels) == 2:
-            cn = m.contour(lons, lats, hgrid.data, levels = levels[0], cmap=plt.get_cmap('Blues'), linestyles='solid', latlon=True)
-            cp = m.contour(lons, lats, hgrid.data, levels = levels[1], cmap=plt.get_cmap('Reds'), latlon=True)
-        else: 
-            if hgrid.data.min() < 0: 
-                cn = m.contour(lons, lats, hgrid.data, levels = levels[0], cmap=plt.get_cmap('Blues'), linestyles='solid', latlon=True)
-            elif hgrid.data.min() > 0: 
-                cp = m.contour(lons, lats, hgrid.data, levels = levels[1], cmap=plt.get_cmap('Reds'), latlon=True)
+#         if len(levels) == 2:
+#             cn = m.contour(lons, lats, hgrid.data, levels = levels[0], cmap=plt.get_cmap('Blues'), linestyles='solid', latlon=True)
+#             cp = m.contour(lons, lats, hgrid.data, levels = levels[1], cmap=plt.get_cmap('Reds'), latlon=True)
+#         else: 
+#             if hgrid.data.min() < 0: 
+#                 cn = m.contour(lons, lats, hgrid.data, levels = levels[0], cmap=plt.get_cmap('Blues'), linestyles='solid', latlon=True)
+#             elif hgrid.data.min() > 0: 
+#                 cp = m.contour(lons, lats, hgrid.data, levels = levels[1], cmap=plt.get_cmap('Reds'), latlon=True)
                 
         # plt.clabel(cn, fmt = '%4.0f', fontsize = 12, alpha=0.8, colors='k')
         # plt.clabel(cp, fmt = '%4.0f', fontsize = 12, alpha=0.8, colors='k')    
@@ -165,14 +189,41 @@ class vector_plot:
         xx = np.arange(0, lons.shape[1], stepp)
 
         points = np.meshgrid(yy, xx)
+        
+        cmap_wind = palettable.colorbrewer.sequential.YlOrBr_9.mpl_colormap
             
-        Q = m.quiver(lons[points], lats[points], ugrid.data[points], vgrid.data[points], wgrid.data[points], \
-                     pivot='middle', scale=scale, cmap=plt.cm.gray_r, latlon=True)
-
+#         Q = m.quiver(lons[points], lats[points], ugrid.data[points], vgrid.data[points], wgrid.data[points], \
+#                      pivot='middle', scale=scale, cmap=plt.get_cmap('gray_r'), latlon=True)
+    
+        Q = m.quiver(lons[points], lats[points], ugrid['composite_anomalies'].data[points], vgrid['composite_anomalies'].data[points], \
+                     pivot='middle', scale=scale, color='0.4', latlon=True)
+        
+        """
+        test
+        """
+        
+        mask = np.logical_or((c.ucompos.dset_compos['pvalues'].data < 0.1),(c.vcompos.dset_compos['pvalues'].data < test))
+        
+        ugrid_test = ma.masked_array(ugrid['composite_anomalies'].data, -mask) 
+        vgrid_test = ma.masked_array(vgrid['composite_anomalies'].data, -mask) 
+        
+        QT = m.quiver(lons[points], lats[points], ugrid_test[points], vgrid_test[points], \
+                     pivot='middle', scale=scale, color='k', latlon=True)        
+        
+        
+        
+#         m.streamplot(lons, lats, ugrid.data, vgrid.data, color='k', latlon=True, density=2.5, cmap=plt.cm.gray_r, linewidth=3*wgrid.data)
+        
         l,b,w,h = ax.get_position().bounds
+        
+        """
+        determine the wind vector key length as the 95th percentile of the wind speed 
+        """
 
-        qk = plt.quiverkey(Q, l+w-0.1, b-0.01, 0.25, "0.25 m/s", labelpos='E', fontproperties={'size':12}, coordinates='figure', zorder=20)
+        wsq = np.round(scoreatpercentile(wgrid['composite_anomalies'].data, 95), decimals=1)
+        
+        qk = plt.quiverkey(Q, l+w-0.1, b-0.01, wsq, "{:4.2f} m/s".format(wsq), labelpos='E', fontproperties={'size':12}, coordinates='figure', zorder=20)
 
-        m.drawcoastlines(color='0.4')
+        m.drawcoastlines(color='0.2', linewidth=1)
         
         return f
