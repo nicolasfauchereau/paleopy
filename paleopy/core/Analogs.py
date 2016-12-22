@@ -305,6 +305,17 @@ class Analogs:
                 # concatenate the datasets along a 'proxy' dimension
                 self.dset_compos = xray.concat(l_dset_compos, dim='proxy')
 
+        return self
+
+    def __repr__(self):
+        """
+        the internal representation of an Analog object when called interactively
+        """
+        return """
+        ------------------
+        Analog composite for a {}, with dataset {} and variable {}
+        ------------------
+        """.format(self.parent.description, self.dataset, self.variable)
 
     def save_to_file(self, fname=None):
         nc = self.dset_compos[['composite_anomalies', 'pvalues']]

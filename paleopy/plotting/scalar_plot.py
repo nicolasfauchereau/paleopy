@@ -29,26 +29,26 @@ class scalar_plot:
         self.border = border
         self.proxies_loc = proxies_loc
 
-    def _get_domain(self, domain):
+    def __get_domain(self, domain):
 
         domain_dset = self.analogs.dset_dict['domain']
 
         if ( (self.domain[0] < domain_dset[0]) | (self.domain[1] > domain_dset[1])  \
             | (self.domain[2] < domain_dset[2]) | (self.domain[3] > domain_dset[3]) ):
-            print("""ERROR! the domain for the analogsite is partly outside the limits of the dataset""")
+            print("""ERROR! the domain for the analog composite is partly outside the limits of the dataset""")
             raise Exception("DOMAIN ERROR")
 
         else:
             # checks whether the first latitude is the northermost or southermost latitude
-            latstart = self.analogs.dset['latitudes'].data[0]
-            latend  = self.analogs.dset['latitudes'].data[-1]
+            latstart = self.analogs.dset_compos['latitudes'].data[0]
+            latend  = self.analogs.dset_compos['latitudes'].data[-1]
             # if first latitude northermost, reverse the order of the domain selection
             if latstart > latend:
-                dset_domain = self.analogs.dset.sel(latitudes=slice(self.domain[3], self.domain[2]), \
+                dset_domain = self.analogs.dset_compos.sel(latitudes=slice(self.domain[3], self.domain[2]), \
                                                    longitudes=slice(self.domain[0], self.domain[1]))
             # if not, go ahead with the domain limits as they are provided
             else:
-                dset_domain = self.analogs.dset.sel(latitudes=slice(self.domain[2], self.domain[3]), \
+                dset_domain = self.analogs.dset_compos.sel(latitudes=slice(self.domain[2], self.domain[3]), \
                                                    longitudes=slice(self.domain[0], self.domain[1]))
 
             self.dset_domain = dset_domain
@@ -56,15 +56,15 @@ class scalar_plot:
         return self
 
 
-    def _get_plots_params(self, data):
+    def __get_plots_params(self, data):
         """
         data can be either the data array attached to:
 
-        + self.analogs.dset['composite_anomalies']
+        + self.analogs.dset_compos['composite_anomalies']
 
         or one of the data arrays attached to
 
-        + self.analogs.dset['composite_sample']
+        + self.analogs.dset_compos['composite_sample']
         """
 
         # ravel and removes nans for calculation of intervals etc
@@ -106,16 +106,16 @@ class scalar_plot:
 
         return self
 
-    def _get_basemap(self):
+    def __get_basemap(self):
         """
         given the projection and the domain, returns
         the dataset as well as the Basemap instance
         """
 
         if self.domain:
-            self._get_domain(self.domain)
+            self.__get_domain(self.domain)
         else:
-            self.dset_domain = self.analogs.dset
+            self.dset_domain = self.analogs.dset_compos
 
         # get the lat and lons
         latitudes = self.dset_domain['latitudes'].data
@@ -150,7 +150,7 @@ class scalar_plot:
 
         return self
 
-    def _meshgrid(self, data_array):
+    def __meshgrid(self, data_array):
         """
         given some data, returns the np.meshgrid associated
         lons and lats + addcyclic longitude if proj is 'spstere'
@@ -181,7 +181,7 @@ class scalar_plot:
 
         # get the basemap instance
 
-        self._get_basemap()
+        self.__get_basemap()
 
         # ===============================================================
         # plots
@@ -196,7 +196,7 @@ class scalar_plot:
             mat = self.dset_domain['composite_sample'].data
 
             # get the plot params from the composite sample data
-            self._get_plots_params(mat)
+            self.__get_plots_params(mat)
 
             # if the number of years is odd, add 1 to the subplots
             if (mat.shape[0] % 2) > 0:
@@ -220,7 +220,7 @@ class scalar_plot:
 
                 matp = mat[i,:,:]
 
-                lons, lats, matp = self._meshgrid(matp)
+                lons, lats, matp = self.__meshgrid(matp)
 
                 self.m.ax = ax
 
@@ -291,12 +291,12 @@ class scalar_plot:
             mat = self.dset_domain['composite_anomalies'].data
 
             # get the plot params from the composite anomalies data
-            self._get_plots_params(mat)
+            self.__get_plots_params(mat)
 
             pvalues = self.dset_domain['pvalues'].data
 
-            lons, lats, mat = self._meshgrid(mat)
-            lons, lats, pvalues = self._meshgrid(pvalues)
+            lons, lats, mat = self.__meshgrid(mat)
+            lons, lats, pvalues = self.__meshgrid(pvalues)
 
             r, c = mat.shape
 
@@ -315,7 +315,7 @@ class scalar_plot:
                 #m.contourf(lon, lat, P, colors='0.99', \
                 #           hatches=['...'], latlon=True, zorder=2, alpha=0.2)
                 self.m.contour(lons, lats, pvalues, [self.test], latlon=True, \
-                          colors='#8C001A', linewidths=1.5)
+                          colors='#8C001A', linewidths=1.5, zorder=10)
 
             # sets the colorbar
             cb = self.m.colorbar(im)

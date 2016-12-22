@@ -19,7 +19,6 @@ class WR:
     takes either a proxy or ensemble instance and either 'SW Pacific Regimes' or 'Kidson Types'
     """
     def __init__(self, obj, classification='Kidson Types'):
-        super(WR, self).__init__()
 
         # the parent can be either an instance of a `proxy` or `ensemble` class
         self.parent = obj

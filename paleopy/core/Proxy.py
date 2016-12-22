@@ -124,7 +124,7 @@ class Proxy:
     method : string
             can be either 'closest 8' or 'quintiles'
             to specicify the method employed to choose
-            the analog seasons
+            the analog seasons. Defaults to 'closest 8'
 
     aspect : float
             The aspect of the proxy site (in degrees from 0 to 360)
@@ -163,6 +163,7 @@ class Proxy:
 
         if lon < 0:
             lon += 360.
+        self._dset_dict = None
         self.description = 'proxy'
         self.sitename = sitename
         self.proxy_type = proxy_type
@@ -187,14 +188,22 @@ class Proxy:
         self.detrend = bool(detrend)
         self.method = method
 
-    def __read_dset_params(self):
-        """
-        reads the `datasets.json` file and loads the dictionnary
-        containing all the parameters for this dataset
-        """
-        with open(os.path.join(self.djsons, 'datasets.json'), 'r') as f:
-            dset_dict = json.loads(f.read())
-        self.dset_dict = dset_dict[self.dataset][self.variable]
+    # use the @property decorator on that one, because `dset_dict` is just an attribute
+    @property
+    def dset_dict(self):
+        if self._dset_dict is None:
+            with open(os.path.join(self.djsons, 'datasets.json'), 'r') as f:
+                _dset_dict = json.loads(f.read())
+            return _dset_dict[self.dataset][self.variable]
+
+    # def __read_dset_params(self):
+    #     """
+    #     reads the `datasets.json` file and loads the dictionnary
+    #     containing all the parameters for this dataset
+    #     """
+    #     with open(os.path.join(self.djsons, 'datasets.json'), 'r') as f:
+    #         dset_dict = json.loads(f.read())
+    #     self.dset_dict = dset_dict[self.dataset][self.variable]
 
     def __check_domain(self):
         """
@@ -202,8 +211,8 @@ class Proxy:
         is compatible with the domain of the
         dataset
         """
-        if not(hasattr(self, 'dset_dict')):
-            self.__read_dset_params()
+        # if not(hasattr(self, 'dset_dict')):
+        #     self.__read_dset_params()
         domain = self.dset_dict['domain']
         lond = self.coords[0]
         latd = self.coords[1]
@@ -232,7 +241,7 @@ class Proxy:
         tmp_df.loc[:,'weights'] = (1 - weights) / (1 - weights).sum()
         return tmp_df
 
-    def extract_ts(self):
+    def __extract_ts(self):
         """
         extract the time-series for the closest grid-point to
         the passed proxy coordinates
@@ -296,7 +305,7 @@ class Proxy:
         seasons_parameters = seasons_params()
 
         if not(hasattr(self, 'ts')):
-            self.extract_ts()
+            self.__extract_ts()
 
         # if the variable is rainfall, we calculate rolling sum
         if self.dset_dict['units'] in ['mm']:
@@ -352,7 +361,7 @@ class Proxy:
 
         self.analogs : a pandas DataFrame
         self.analog_years : a list with the analog years
-        self.quintiles : the bins for the quintiles used
+        self.quintiles : the bins for the quintiles used (if method is `quintiles`)
         """
 
         if not(hasattr(self, 'ts_seas')):
