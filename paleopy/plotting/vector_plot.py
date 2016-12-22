@@ -1,13 +1,13 @@
 import numpy as np
+from numpy import ma
 from matplotlib import pyplot as plt
 from mpl_toolkits.basemap import Basemap as bm
-from mpl_toolkits.basemap import addcyclic, shiftgrid
 import palettable
 from scipy.stats import scoreatpercentile
 
 class vector_plot:
     """
-    plots vector plots (uwnd + vwnd) on top of geopotential anomalies (ht)
+    plots vector plots (uwnd + vwnd) on top of geopotential anomalies (hgt)
 
     Parameters
     ----------
@@ -87,11 +87,18 @@ class vector_plot:
 
         return vmin, vmax, levels, cmap
     
-    def plot(self, domain = None, res='c', stepp=1, scale=8, test=0.1):
+    def plot(self, domain = None, res='c', stepp=1, scale=None, test=0.1):
         
         """
         if the domain is actually defined, we select in lat and lon, making sure the 
         latitudes are increasing (from South to North)
+        
+        scale needs to be determined empirically
+        
+        for 850 hPa, 8 works well 
+        
+        for 200 hPa, 15 works well
+        
         """
         
         if domain is not None: 
@@ -116,7 +123,6 @@ class vector_plot:
             hgrid = self.hgt_dset
             wgrid = self.windspeed_dset
             
-        
         latitudes = wgrid.latitudes.data
         longitudes = wgrid.longitudes.data
 
@@ -155,7 +161,12 @@ class vector_plot:
         plot using pcolormesh 
         """
         
-        im = m.pcolormesh(lons, lats, hgrid['composite_anomalies'].data, cmap=cmap, vmin=vmin, vmax=vmax)
+        im = m.pcolormesh(lons, lats, hgrid['composite_anomalies'].data, cmap=cmap, vmin=vmin, vmax=vmax, latlon=True)
+        
+        # this if we want filled contours
+        
+#         im = m.contourf(lons, lats, hgrid['composite_anomalies'].data, cmap=cmap, levels=list(chain(*levels)), latlon=True, extend='both')
+
         
         cb = m.colorbar(im)
 
@@ -195,6 +206,14 @@ class vector_plot:
 #         Q = m.quiver(lons[points], lats[points], ugrid.data[points], vgrid.data[points], wgrid.data[points], \
 #                      pivot='middle', scale=scale, cmap=plt.get_cmap('gray_r'), latlon=True)
     
+        """
+        if the scale is NOT defined, we try to determine a reasonable value
+        given the wind speed anomalies
+        """
+        if scale is None: 
+            scale = 13 * wgrid['composite_anomalies'].max().data
+    
+    
         Q = m.quiver(lons[points], lats[points], ugrid['composite_anomalies'].data[points], vgrid['composite_anomalies'].data[points], \
                      pivot='middle', scale=scale, color='0.4', latlon=True)
         
@@ -204,8 +223,8 @@ class vector_plot:
         
         mask = np.logical_or((c.ucompos.dset_compos['pvalues'].data < 0.1),(c.vcompos.dset_compos['pvalues'].data < test))
         
-        ugrid_test = ma.masked_array(ugrid['composite_anomalies'].data, -mask) 
-        vgrid_test = ma.masked_array(vgrid['composite_anomalies'].data, -mask) 
+        ugrid_test = ma.masked_array(ugrid['composite_anomalies'].data, ~mask) 
+        vgrid_test = ma.masked_array(vgrid['composite_anomalies'].data, ~mask) 
         
         QT = m.quiver(lons[points], lats[points], ugrid_test[points], vgrid_test[points], \
                      pivot='middle', scale=scale, color='k', latlon=True)        
