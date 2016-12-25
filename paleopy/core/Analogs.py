@@ -300,8 +300,6 @@ class Analogs:
                     dset_compos = self.__process_one(years, season, climatology=climatology, detrend=detrend, weights=weights, weighting=weighting)
                     l_dset_compos.append(dset_compos)
 
-                dset_compos = xray.concat(l_dset_compos, dim='proxy')
-
                 # concatenate the datasets along a 'proxy' dimension
                 self.dset_compos = xray.concat(l_dset_compos, dim='proxy')
 
