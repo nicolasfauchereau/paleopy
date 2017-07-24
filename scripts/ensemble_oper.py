@@ -214,7 +214,7 @@ if verbose:
     save_progress(opath, 'VCSN Vapour Pressure', 72)
 
 vcsn = analogs(ens, 'vcsn', 'Vapour_Pressure').composite()
-f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.5, vmax=1.5).plot(subplots=False)
+f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-3, vmax=3).plot(subplots=False)
 f.savefig(os.path.join(opath, 'VCSN_VP_ensemble.png'))
 images.append(
     {'id': 'VCSN_VP_composite_anomaly', 'title': 'VCSN Vapour Pressure anomaly', 'filename': 'VCSN_VP_ensemble.png'})
