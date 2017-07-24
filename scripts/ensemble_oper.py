@@ -188,31 +188,6 @@ plt.close(f)
 
 # ==============================================================================
 """
-WEATHER REGIMES
-"""
-
-if verbose:
-    save_progress(opath, 'Weather Regimes - Barplot', 60)
-
-w = WR(ens, classification='New Zealand')
-w.probs_anomalies(kind='many')
-f = w.plot_bar()
-f.savefig(os.path.join(opath, 'WR_ensemble.png'))
-images.append({'id': 'Ensemble_bar_plot', 'title': 'NZ weather regimes (Kidson Types) for ensemble composite',
-               'filename': 'WR_ensemble.png'})
-plt.close(f)
-
-if verbose:
-    save_progress(opath, 'Weather Regimes - Heatmap', 65)
-
-f = w.plot_heatmap()
-f.savefig(os.path.join(opath, 'WR_heatmap.png'))
-images.append({'id': 'Ensemble_heat_map', 'title': 'Significance of regime changes for ensemble members',
-               'filename': 'WR_heatmap.png'})
-plt.close(f)
-
-# ==============================================================================
-"""
 VCSN
 """
 if verbose:
@@ -226,13 +201,55 @@ images.append(
 plt.close(f)
 
 if verbose:
-    save_progress(opath, 'VCSN Mean Temperature', 75)
+    save_progress(opath, 'VCSN Mean Temperature', 71)
+
 vcsn = analogs(ens, 'vcsn', 'TMean').composite()
 f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.5, vmax=1.5).plot(subplots=False)
 f.savefig(os.path.join(opath, 'VCSN_temp_ensemble.png'))
 images.append(
     {'id': 'VCSN_Tmean_composite_anomaly', 'title': 'VCSN Tmean anomaly', 'filename': 'VCSN_temp_ensemble.png'})
 plt.close(f)
+
+if verbose:
+    save_progress(opath, 'VCSN Vapour Pressure', 72)
+
+vcsn = analogs(ens, 'vcsn', 'Vapour_Pressure').composite()
+f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.5, vmax=1.5).plot(subplots=False)
+f.savefig(os.path.join(opath, 'VCSN_VP_ensemble.png'))
+images.append(
+    {'id': 'VCSN_VP_composite_anomaly', 'title': 'VCSN Vapour Pressure anomaly', 'filename': 'VCSN_VP_ensemble.png'})
+plt.close(f)
+
+# ==============================================================================
+"""
+WEATHER REGIMES
+"""
+
+if ens.proxies_consistent == 0 and (len(set(self.season)) != 1):
+    print("cannot process the WR plots if the proxies's seasons are inconsistent")
+    pass
+else:
+    if verbose:
+        save_progress(opath, 'Weather Regimes - Barplot', 80)
+
+    w = WR(ens, classification='New Zealand')
+    w.probs_anomalies(kind='many')
+    f = w.plot_bar()
+    f.savefig(os.path.join(opath, 'WR_ensemble.png'))
+    images.append({'id': 'Ensemble_bar_plot', 'title': 'NZ weather regimes (Kidson Types) for ensemble composite',
+                   'filename': 'WR_ensemble.png'})
+    plt.close(f)
+
+    if verbose:
+        save_progress(opath, 'Weather Regimes - Heatmap', 90)
+
+    f = w.plot_heatmap()
+    f.savefig(os.path.join(opath, 'WR_heatmap.png'))
+    images.append({'id': 'Ensemble_heat_map', 'title': 'Significance of regime changes for ensemble members',
+                   'filename': 'WR_heatmap.png'})
+    plt.close(f)
+
+
 
 
 if verbose:

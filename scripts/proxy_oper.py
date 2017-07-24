@@ -151,7 +151,9 @@ p.find_analogs()
 # 2: save the proxy in the JSON file
 p.proxy_repr()
 
-# 3: plot the time-series of seasonal values with the analog years and save
+"""
+plots the time series for the proxy analogs
+"""
 if verbose:
     save_progress(opath, 'Time Series', 10)
 f = p.plot_season_ts()
@@ -161,30 +163,29 @@ images.append({'id': 'time_series', 'title' : 'Analog Seasons', 'filename': 'tim
 plt.close(f)
 
 """
-instantiate the analog classes with the proxy for each dataset + variable we
-want to map
+plots the VCSN composite anomalies in every case
 """
 
-"""
-if the attached dataset is the VCSN dataset, we plot the corresponding composite
-anomalies for the variable the proxy is sensitive to
-"""
-if p.dataset == 'vcsn':
-    if verbose:
-        save_progress(opath, 'VCSN', 15)
-    if p.variable == 'Rain':
-        vcsn = analogs(p, 'vcsn', 'Rain').composite()
-        f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h').plot(subplots=False)
-        f.savefig(os.path.join(opath,'VCSN_rain_proxy.png'))
-        images.append({'id': 'vcsn_rain', 'title' : 'VCSN seasonal rainfall', 'filename': 'VCSN_rain_proxy.png'})
-        plt.close(f)
+if verbose:
+    save_progress(opath, 'VCSN', 15)
 
-    if p.variable == 'TMean':
-        vcsn = analogs(p, 'vcsn', 'TMean').composite()
-        f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.5, vmax=1.5).plot(subplots=False)
-        f.savefig(os.path.join(opath,'VCSN_tmean_proxy.png'))
-        images.append({'id': 'vcsn_tmean', 'title' : 'VCSN seasonal Temperatures', 'filename': 'VCSN_tmean_proxy.png'})
-        plt.close(f)
+vcsn = Analogs(p, 'vcsn', 'Rain').composite()
+f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h').plot(subplots=False)
+f.savefig(os.path.join(opath,'VCSN_rain_proxy.png'))
+images.append({'id': 'vcsn_rain', 'title' : 'VCSN seasonal rainfall', 'filename': 'VCSN_rain_proxy.png'})
+plt.close(f)
+
+vcsn = Analogs(p, 'vcsn', 'TMean').composite()
+f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-1.5, vmax=1.5).plot(subplots=False)
+f.savefig(os.path.join(opath,'VCSN_tmean_proxy.png'))
+images.append({'id': 'vcsn_tmean', 'title' : 'VCSN seasonal Temperatures', 'filename': 'VCSN_tmean_proxy.png'})
+plt.close(f)
+
+vcsn = Analogs(p, 'vcsn', 'Vapour_Pressure').composite()
+f = scalar_plot(vcsn, test=0.1, proj='cyl', res='h', vmin=-3, vmax=3).plot(subplots=False)
+f.savefig(os.path.join(opath,'VCSN_VP_proxy.png'))
+images.append({'id': 'vcsn_VP', 'title' : 'VCSN seasonal Vapour Pressure', 'filename': 'VCSN_VP_proxy.png'})
+plt.close(f)
 
 
 # ==============================================================================
@@ -193,7 +194,7 @@ Sea Surface Temperatures, global
 """
 if verbose:
     save_progress(opath, 'SST', 20)
-sst = analogs(p, 'ersst', 'sst').composite()
+sst = Analogs(p, 'ersst', 'sst').composite()
 f = scalar_plot(sst, test=0.1, proj='cyl', vmin=-1.5, vmax=1.5).plot()
 f.savefig(os.path.join(opath,'SST_proxy.png'))
 images.append({'id': 'sst', 'title' : 'Sea Surface Temperature', 'filename': 'SST_proxy.png'})
@@ -205,7 +206,7 @@ HGT at 850 hPa, global
 """
 if verbose:
     save_progress(opath, 'HGT at 850 hPa', 30)
-hgt = analogs(p, 'ncep', 'hgt_850').composite()
+hgt = Analogs(p, 'ncep', 'hgt_850').composite()
 f = scalar_plot(hgt, test=0.05, proj='cyl', vmin=-50.0, vmax=50.0).plot()
 f.savefig(os.path.join(opath,'hgt_850_proxy.png'))
 images.append({'id': 'hgt_850', 'title' : 'Geopotential at 850 hPa', 'filename': 'hgt_850_proxy.png'})
@@ -216,7 +217,7 @@ HGT at 1000 hPa, global
 """
 if verbose:
     save_progress(opath, 'HGT at 1000 hPa', 32)
-hgt = analogs(p, 'ncep', 'hgt_1000').composite()
+hgt = Analogs(p, 'ncep', 'hgt_1000').composite()
 f = scalar_plot(hgt, test=0.05, proj='cyl', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath,'hgt_1000_proxy.png'))
 images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'hgt_1000_proxy.png'})
@@ -227,7 +228,7 @@ HGT at 1000 hPa, polar
 """
 if verbose:
     save_progress(opath, 'HGT at 1000 hPa', 34)
-hgt = analogs(p, 'ncep', 'hgt_1000').composite()
+hgt = Analogs(p, 'ncep', 'hgt_1000').composite()
 f = scalar_plot(hgt, test=0.05, proj='spstere', vmin=-25.0, vmax=25.0).plot()
 f.savefig(os.path.join(opath,'hgt_1000_proxy_polar.png'))
 images.append({'id': 'hgt_1000', 'title' : 'Geopotential at 1000 hPa', 'filename': 'hgt_1000_proxy_polar.png'})
@@ -248,10 +249,10 @@ plt.close(f)
 HGT at 1000 hPa, NZ domain, one map per year
 """
 if verbose:
-    save_progress(opath, 'HGT 1000 NZ domain analogs', 38)
+    save_progress(opath, 'HGT 1000 NZ domain Analogs', 38)
 f = scalar_plot(hgt, test=0.1, proj='cyl', domain=[165, 180, -50., -30], res='h', vmin=-25.0, vmax=25.0).plot(subplots=True)
 f.savefig(os.path.join(opath,'hgt_1000_proxy_NZ_years.png'))
-images.append({'id': 'hgt_1000_NZ_samples', 'title' : 'Geopotential at 1000 hPa, NZ domain, analog years', 'filename': 'hgt_1000_proxy_NZ_years.png'})
+images.append({'id': 'hgt_1000_NZ_samples', 'title' : 'Geopotential at 1000 hPa, NZ domain, Analog years', 'filename': 'hgt_1000_proxy_NZ_years.png'})
 plt.close(f)
 
 """
@@ -259,7 +260,7 @@ UWND at 200 hPa
 """
 if verbose:
     save_progress(opath, 'UWND at 200hpa', 40)
-uwnd = analogs(p, 'ncep', 'uwnd_200').composite()
+uwnd = Analogs(p, 'ncep', 'uwnd_200').composite()
 f = scalar_plot(uwnd, test=0.05, proj='cyl', vmin=-10.0, vmax=10.0).plot()
 f.savefig(os.path.join(opath, 'map2_proxy.png'))
 images.append({'id': 'uwnd_200', 'title' : 'Zonal Wind at 200 hPa', 'filename': 'map2_proxy.png'})
@@ -270,7 +271,7 @@ UWND at 850 hPa
 """
 if verbose:
     save_progress(opath, 'UWND at 850hpa', 43)
-uwnd = analogs(p, 'ncep', 'uwnd_850').composite()
+uwnd = Analogs(p, 'ncep', 'uwnd_850').composite()
 f = scalar_plot(uwnd, test=0.05, proj='cyl', vmin=-3.0, vmax=3.0).plot()
 f.savefig(os.path.join(opath, 'map3_proxy.png'))
 images.append({'id': 'uwnd_850', 'title' : 'Zonal Wind at 850 hPa', 'filename': 'map3_proxy.png'})
@@ -281,10 +282,42 @@ UWND at 1000 hPa
 """
 if verbose:
     save_progress(opath, 'UWND at 1000hpa', 46)
-uwnd = analogs(p, 'ncep', 'uwnd_1000').composite()
+uwnd = Analogs(p, 'ncep', 'uwnd_1000').composite()
 f = scalar_plot(uwnd, test=0.05, proj='cyl', vmin=-3.0, vmax=3.0).plot()
 f.savefig(os.path.join(opath, 'map4_proxy.png'))
 images.append({'id': 'uwnd_1000', 'title' : 'Zonal Wind at 1000 hPa', 'filename': 'map4_proxy.png'})
+plt.close(f)
+
+"""
+HGT and WIND at 850 hPa
+"""
+if verbose:
+    save_progress(opath, 'hgt and wind at 850hpa', 46)
+
+hgt = Analogs(p, 'ncep', 'hgt_850').composite()
+uwnd = Analogs(p, 'ncep', 'uwnd_850').composite()
+vwnd = Analogs(p, 'ncep', 'vwnd_850').composite()
+
+f = vector_plot(uwnd, vwnd, hgt).plot(stepp=3, res='c')
+
+f.savefig(os.path.join(opath, 'hgt_wind_850.png'))
+images.append({'id': 'hgt_wind_850', 'title' : 'geopotential and wind at 850 hPa', 'filename': 'hgt_wind_850_proxy.png'})
+plt.close(f)
+
+"""
+HGT and WIND at 200 hPa
+"""
+if verbose:
+    save_progress(opath, 'hgt and wind at 850hpa', 46)
+
+hgt = Analogs(p, 'ncep', 'hgt_200').composite()
+uwnd = Analogs(p, 'ncep', 'uwnd_200').composite()
+vwnd = Analogs(p, 'ncep', 'vwnd_200').composite()
+
+f = vector_plot(uwnd, vwnd, hgt).plot(stepp=3, res='c')
+
+f.savefig(os.path.join(opath, 'hgt_wind_200.png'))
+images.append({'id': 'hgt_wind_200', 'title' : 'geopotential and wind at 200 hPa', 'filename': 'hgt_wind_200_proxy.png'})
 plt.close(f)
 
 # ==============================================================================
